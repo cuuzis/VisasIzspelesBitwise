@@ -12,7 +12,7 @@ namespace VisasIzspelesBitwise
     class Program
     {
         // Hardcoded params
-        public const bool WRITE_TO_CONSOLE = false;
+        public const bool WRITE_TO_CONSOLE = true;
         public const bool WRITE_TO_FILE = false;
         public static String FILENAME = "izspeles.txt";
 

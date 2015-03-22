@@ -55,18 +55,16 @@ namespace VisasIzspelesBitwise
             player2.Next = player3;
             player3.Next = player1;
 
+            // Deal cards
             int[] playerHands = { 0, 0, 0 };
             List<int> deck = new List<int>();
             for (int i = 0; i < Deck.SIZE; i++)
                 deck.Add(1 << i);
             // My random sort for debug
             deck = deck.OrderBy(c => GetNumTMP()).ToList();
-
             // Random sort
             //Random rand = new Random();
             //deck = deck.OrderBy(c => (int)rand.Next()).ToList();
-
-            // Deal cards
             for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
                 playerHands[i / HAND_SIZE] = playerHands[i / HAND_SIZE] | deck.ElementAt(i);
             if ((playerHands[0] & playerHands[1] & playerHands[2]) != 0)
@@ -82,7 +80,7 @@ namespace VisasIzspelesBitwise
 
             int[] moveHistory = new int[Deck.SIZE];
             int playedCard;
-            int cardsLeft = playerHands[0];
+            int cardsLeft = handP1;
             while (cardsLeft != 0) //TODO:Multithreading
             {
                 playedCard = RemoveLastCard(ref cardsLeft);
@@ -92,27 +90,14 @@ namespace VisasIzspelesBitwise
 
         private void PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard, int handP1, int handP2, int handP3, Player activePlayer)
         {
-            // Profiling
-            if (gameCount == 10000000)
-                return;
-
             int validMoves;
             moveHistory[moveCount++] = playedCard;
             if (activePlayer == player1)
-            {
                 RemoveCard(ref handP1, playedCard);
-                validMoves = GetValidMoves(handP2, trickCard);
-            }
             else if (activePlayer == player2)
-            {
                 RemoveCard(ref handP2, playedCard);
-                validMoves = GetValidMoves(handP3, trickCard);
-            }
             else// if (activePlayer == player3)
-            {
                 RemoveCard(ref handP3, playedCard);
-                validMoves = GetValidMoves(handP1, trickCard);
-            }
 
             Player nextPlayer;
             if (moveCount % playerCount == 0)
@@ -126,8 +111,15 @@ namespace VisasIzspelesBitwise
                     validMoves = handP3;
             }
             else
+            {
                 nextPlayer = activePlayer.Next;
-
+                if (activePlayer == player1)
+                    validMoves = GetValidMoves(handP2, trickCard);
+                else if (activePlayer == player2)
+                    validMoves = GetValidMoves(handP3, trickCard);
+                else// if (activePlayer == player3)
+                    validMoves = GetValidMoves(handP1, trickCard);
+            }
             while (validMoves != 0)
             {
                 playedCard = RemoveLastCard(ref validMoves);
