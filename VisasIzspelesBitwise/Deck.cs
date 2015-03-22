@@ -14,8 +14,18 @@ namespace VisasIzspelesBitwise
         //public static readonly string[] SHORTNAME = { "9♥", "K♥", "10♥", "A♥", "9♠", "K♠", "10♠", "A♠", "9♣", "K♣", "10♣", "A♣", "7♦", "8♦", "9♦", "K♦", "10♦", "A♦", "J♦", "J♥", "J♠", "J♣", "Q♦", "Q♥", "Q♠", "Q♣" };
         //public static int[] deck
 
+        public static int[] VALID_MOVES = new int[33554433];
+        public static int[] STRONGER = new int[33554433];
 
-        public static int VALID_MOVES(int card)
+        public Deck()
+        {
+            for (int card = 1; card <= 33554432; card = (card << 1))
+                VALID_MOVES[card] = _VALID_MOVES(card);
+            for (int card = 1; card <= 33554432; card = (card << 1))
+                STRONGER[card] = _STRONGER(card);
+        }
+
+        private static int _VALID_MOVES(int card)
         {
             switch (card)
             {
@@ -53,7 +63,7 @@ namespace VisasIzspelesBitwise
         /// <summary>
         ///  Returns all cards stronger than card.
         /// </summary>
-        public static int STRONGER(int card)
+        private static int _STRONGER(int card)
         {
             switch (card)
             {

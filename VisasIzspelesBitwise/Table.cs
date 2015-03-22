@@ -8,6 +8,7 @@ namespace VisasIzspelesBitwise
 {
     class Table
     {
+        // Debug + profiling
         private int tmp = 0;
         private int GetNumTMP()
         {
@@ -70,13 +71,14 @@ namespace VisasIzspelesBitwise
                 playerHands[i / HAND_SIZE] = playerHands[i / HAND_SIZE] | deck.ElementAt(i);
             if ((playerHands[0] & playerHands[1] & playerHands[2]) != 0)
                 throw new Exception("Incorrect hands");
-            int handP1 = playerHands[0];
-            int handP2 = playerHands[1];
-            int handP3 = playerHands[2];
 
             PrintHand(playerHands[0]);
             PrintHand(playerHands[1]);
             PrintHand(playerHands[2]);
+
+            int handP1 = playerHands[0];
+            int handP2 = playerHands[1];
+            int handP3 = playerHands[2];
 
             int[] moveHistory = new int[Deck.SIZE];
             int playedCard;
@@ -90,6 +92,10 @@ namespace VisasIzspelesBitwise
 
         private void PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard, int handP1, int handP2, int handP3, Player activePlayer)
         {
+            // Profiling
+            if (gameCount == 10000000)
+                return;
+
             int validMoves;
             moveHistory[moveCount++] = playedCard;
             if (activePlayer == player1)
@@ -124,7 +130,6 @@ namespace VisasIzspelesBitwise
 
             while (validMoves != 0)
             {
-                //PrintHistory(moveHistory); // Step by step debug
                 playedCard = RemoveLastCard(ref validMoves);
                 if (moveCount % playerCount == 0)
                     trickCard = playedCard;
@@ -158,7 +163,7 @@ namespace VisasIzspelesBitwise
 
         private int GetValidMoves(int hand, int trickCard)
         {
-            int validMoves = Intersection(hand, Deck.VALID_MOVES(trickCard));
+            int validMoves = Intersection(hand, Deck.VALID_MOVES[trickCard]);
             if (validMoves == 0)
                 validMoves = hand;
             return validMoves;
@@ -169,7 +174,7 @@ namespace VisasIzspelesBitwise
         /// </summary>
         private bool IsStronger(int card1, int card2)
         {
-            return ((card1 & Deck.STRONGER(card2)) != 0);
+            return ((card1 & Deck.STRONGER[card2]) != 0);
         }
         private int RemoveLastCard(ref int hand)
         {

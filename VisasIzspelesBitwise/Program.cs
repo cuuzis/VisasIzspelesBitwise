@@ -19,9 +19,10 @@ namespace VisasIzspelesBitwise
 
         static void Main(string[] args)
         {
+            Deck myDeck = new Deck();
+
             if (WRITE_TO_FILE)
                 File.CreateText(FILENAME).Close();
-
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -32,7 +33,7 @@ namespace VisasIzspelesBitwise
 
             stopwatch.Stop();
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
-            Console.ReadLine();
+            //Console.ReadLine();
         }
     }
 }
