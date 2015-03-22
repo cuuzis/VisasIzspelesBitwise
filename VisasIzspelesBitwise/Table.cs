@@ -38,7 +38,7 @@ namespace VisasIzspelesBitwise
         private const int HAND_SIZE = 8;
         private const int TABLE_SIZE = 2;
         private int gameCount = 0;
-        private int playerCount = 3;
+        private const int playerCount = 3;// constant for now
         private Player player1;
         private Player player2;
         private Player player3;
@@ -108,11 +108,26 @@ namespace VisasIzspelesBitwise
                 validMoves = GetValidMoves(handP1, trickCard);
             }
 
-
+            Player nextPlayer;
+            if (moveCount % playerCount == 0)
+            {
+                nextPlayer = GetWinner(moveHistory, moveCount, activePlayer);
+                if (nextPlayer == player1)
+                    validMoves = handP1;
+                else if (nextPlayer == player2)
+                    validMoves = handP2;
+                else //if (nextPlayer == player3)
+                    validMoves = handP3;
+            }
+            else
+                nextPlayer = activePlayer.Next;
 
             while (validMoves != 0)
             {
+                //PrintHistory(moveHistory); // Step by step debug
                 playedCard = RemoveLastCard(ref validMoves);
+                if (moveCount % playerCount == 0)
+                    trickCard = playedCard;
                 PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, nextPlayer);
             }
 
@@ -126,6 +141,21 @@ namespace VisasIzspelesBitwise
             }
         }
 
+        private Player GetWinner(int[] moveHistory, int moveCount, Player activePlayer)
+        {
+            if ( IsStronger(moveHistory[moveCount-2], moveHistory[moveCount-3]) )
+            {
+                if ( IsStronger(moveHistory[moveCount-1], moveHistory[moveCount-2]) )
+                    return activePlayer;
+                else
+                    return activePlayer.Next.Next;
+            }
+            else if ( IsStronger(moveHistory[moveCount-1], moveHistory[moveCount-3]) )
+                return activePlayer;
+            else
+                return activePlayer.Next;
+        }
+
         private int GetValidMoves(int hand, int trickCard)
         {
             int validMoves = Intersection(hand, Deck.VALID_MOVES(trickCard));
@@ -134,6 +164,13 @@ namespace VisasIzspelesBitwise
             return validMoves;
         }
 
+        /// <summary>
+        /// Returns true if card1 > card2.
+        /// </summary>
+        private bool IsStronger(int card1, int card2)
+        {
+            return ((card1 & Deck.STRONGER(card2)) != 0);
+        }
         private int RemoveLastCard(ref int hand)
         {
             int card = hand & -hand;

@@ -50,37 +50,40 @@ namespace VisasIzspelesBitwise
             }
         }
 
+        /// <summary>
+        ///  Returns all cards stronger than card.
+        /// </summary>
         public static int STRONGER(int card)
         {
             switch (card)
             {
                 case EMPTY_CARD: return 16777215;//any card
-                case 1: return 15;//hearts
-                case 2: return 15;
-                case 4: return 15;
-                case 8: return 15;
-                case 16: return 240;//spades
-                case 32: return 240;
-                case 64: return 240;
-                case 128: return 240;
-                case 256: return 3840;//clubs
-                case 512: return 3840;
-                case 1024: return 3840;
-                case 2048: return 3840;
-                case 4096: return 16773120;//trumps
-                case 8192: return 16773120;
-                case 16384: return 16773120;
-                case 32768: return 16773120;
-                case 65536: return 16773120;
-                case 131072: return 16773120;
-                case 262144: return 16773120;
-                case 524288: return 16773120;
-                case 1048576: return 16773120;
-                case 2097152: return 16773120;
-                case 4194304: return 16773120;
-                case 8388608: return 16773120;
-                case 16777216: return 16773120;
-                case 33554432: return 16773120;
+                case 1: return 67104782;//hearts
+                case 2: return 67104780;
+                case 4: return 67104776;
+                case 8: return 67104768;
+                case 16: return 67104992;//spades
+                case 32: return 67104960;
+                case 64: return 67104896;
+                case 128: return 67104768;
+                case 256: return 67108352;//clubs
+                case 512: return 67107840;
+                case 1024: return 67106816;
+                case 2048: return 67104768;
+                case 4096: return 67100672;//trumps
+                case 8192: return 67092480;
+                case 16384: return 67076096;
+                case 32768: return 67043328;
+                case 65536: return 66977792;
+                case 131072: return 66846720;
+                case 262144: return 66584576;
+                case 524288: return 66060288;
+                case 1048576: return 65011712;
+                case 2097152: return 62914560;
+                case 4194304: return 58720256;
+                case 8388608: return 50331648;
+                case 16777216: return 33554432;
+                case 33554432: return 0;
                 default: return 0;
             }
         }
