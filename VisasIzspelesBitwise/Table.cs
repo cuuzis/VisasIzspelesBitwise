@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace VisasIzspelesBitwise
@@ -82,12 +81,11 @@ namespace VisasIzspelesBitwise
             int[] moveHistory = new int[Deck.SIZE];
             int playedCard;
             int cardsLeft = handP1;
-
-            Parallel.For(0, HAND_SIZE, ctr =>
+            while (cardsLeft != 0) //TODO:Multithreading
             {
                 playedCard = RemoveLastCard(ref cardsLeft);
                 PlayGame(moveHistory, 0, playedCard, playedCard, Deck.EMPTY_CARD, handP1, handP2, handP3, player1);
-            });
+            }
         }
 
         private void PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard, int handP1, int handP2, int handP3, Player activePlayer)
@@ -133,7 +131,7 @@ namespace VisasIzspelesBitwise
             // Status
             if (moveCount == Deck.SIZE - TABLE_SIZE)
             {
-                Interlocked.Increment(ref gameCount);
+                gameCount++;
                 if (gameCount % 1000000 == 0)
                     Console.WriteLine(gameCount);
                 PrintHistory(moveHistory);
@@ -197,7 +195,7 @@ namespace VisasIzspelesBitwise
                 return;
             for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
                 Console.Write(Deck.SHORTNAME(moveHistory[i]) + " ");
-            Console.WriteLine();
+            Console.ReadLine();
         }
 
         private void PrintHand(int hand)
