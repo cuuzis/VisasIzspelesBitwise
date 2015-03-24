@@ -39,7 +39,7 @@ namespace VisasIzspelesBitwise
 
         private const int HAND_SIZE = 8;
         private const int TABLE_SIZE = 2;
-        private int gameCount = 0;
+        private long gameCount = 0;
         private const int playerCount = 3;// constant for now
         private Player player1;
         private Player player2;
@@ -64,8 +64,8 @@ namespace VisasIzspelesBitwise
             // My random sort for debug
             deck = deck.OrderBy(c => GetNumTMP()).ToList();
             // Random sort
-            //Random rand = new Random();
-            //deck = deck.OrderBy(c => (int)rand.Next()).ToList();
+            Random rand = new Random();
+            deck = deck.OrderBy(c => (int)rand.Next()).ToList();
             for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
                 playerHands[i / HAND_SIZE] = playerHands[i / HAND_SIZE] | deck.ElementAt(i);
             if ((playerHands[0] & playerHands[1] & playerHands[2]) != 0)
