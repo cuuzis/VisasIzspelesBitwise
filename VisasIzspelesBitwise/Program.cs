@@ -33,7 +33,7 @@ namespace VisasIzspelesBitwise
 
             stopwatch.Stop();
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
-            //Console.ReadLine();
+            Console.ReadLine();
         }
     }
 }

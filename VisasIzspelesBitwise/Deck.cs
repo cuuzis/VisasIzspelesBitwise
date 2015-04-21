@@ -10,21 +10,32 @@ namespace VisasIzspelesBitwise
     {
         public const int SIZE = 26;
         public const int EMPTY_CARD = 0;
-                                                 //1,     2,      4,     8,    16,    32,     64,   128,   256,   512,   1024,    11,    12,    13,    14,    15,     16,    17,    18,    19,    20,    21,    22,    23,    24,    25
-        //public static readonly string[] SHORTNAME = { "9♥", "K♥", "10♥", "A♥", "9♠", "K♠", "10♠", "A♠", "9♣", "K♣", "10♣", "A♣", "7♦", "8♦", "9♦", "K♦", "10♦", "A♦", "J♦", "J♥", "J♠", "J♣", "Q♦", "Q♥", "Q♠", "Q♣" };
-        //public static int[] deck
+        public const int MAX_CARD = 33554432;
+        public const int FULL_DECK = MAX_CARD * 2 - 1;
 
-        public static int[] VALID_MOVES = new int[33554433];
-        public static int[] STRONGER = new int[33554433];
+        public static readonly int[] VALID_MOVES = new int[MAX_CARD + 1];
+        public static readonly int[] STRONGER = new int[MAX_CARD + 1];
+        public static readonly int[] VALUE = new int[FULL_DECK +1];
 
         public Deck()
         {
-            for (int card = 1; card <= 33554432; card = (card << 1))
+            for (int card = 1; card <= MAX_CARD; card = (card << 1))
                 VALID_MOVES[card] = _VALID_MOVES(card);
-            for (int card = 1; card <= 33554432; card = (card << 1))
+
+            for (int card = 1; card <= MAX_CARD; card = (card << 1))
                 STRONGER[card] = _STRONGER(card);
+
+            for (int hand = 0; hand <= FULL_DECK; hand++)
+                VALUE[hand] = _VALUE(hand);
+
+
+            if (VALUE[FULL_DECK] != 120)
+                throw new Exception("Deck value is not 120!");
         }
 
+        /// <summary>
+        /// Returns valid moves for a lead card.
+        /// </summary>
         private static int _VALID_MOVES(int card)
         {
             switch (card)
@@ -55,7 +66,7 @@ namespace VisasIzspelesBitwise
                 case 4194304: return 16773120;
                 case 8388608: return 16773120;
                 case 16777216: return 16773120;
-                case 33554432: return 16773120;
+                case 33554432: return 16773120;//MAX_CARD
                 default: return 0;
             }
         }
@@ -92,10 +103,38 @@ namespace VisasIzspelesBitwise
                 case 2097152: return 62914560;
                 case 4194304: return 58720256;
                 case 8388608: return 50331648;
-                case 16777216: return 33554432;
+                case 16777216: return 33554432;//MAX_CARD
                 case 33554432: return 0;
                 default: return 0;
             }
+        }
+        /// <summary>
+        /// Returns point value for any card combination.
+        /// </summary>
+        private static int _VALUE(int hand)
+        {
+            int result = 0;
+            if ((hand & 2) > 0) result += 4;
+            if ((hand & 4) > 0) result += 10;
+            if ((hand & 8) > 0) result += 11;
+            if ((hand & 32) > 0) result += 4;
+            if ((hand & 64) > 0) result += 10;
+            if ((hand & 128) > 0) result += 11;
+            if ((hand & 512) > 0) result += 4;
+            if ((hand & 1024) > 0) result += 10;
+            if ((hand & 2048) > 0) result += 11;
+            if ((hand & 32768) > 0) result += 4;
+            if ((hand & 65536) > 0) result += 10;
+            if ((hand & 131072) > 0) result += 11;
+            if ((hand & 262144) > 0) result += 2;
+            if ((hand & 524288) > 0) result += 2;
+            if ((hand & 1048576) > 0) result += 2;
+            if ((hand & 2097152) > 0) result += 2;
+            if ((hand & 4194304) > 0) result += 3;
+            if ((hand & 8388608) > 0) result += 3;
+            if ((hand & 16777216) > 0) result += 3;
+            if ((hand & 33554432) > 0) result += 3;
+            return result;
         }
         public static string SHORTNAME(int card)
         {
@@ -126,7 +165,7 @@ namespace VisasIzspelesBitwise
                 case 4194304: return "Q♦";
                 case 8388608: return "Q♥";
                 case 16777216: return "Q♠";
-                case 33554432: return "Q♣";
+                case 33554432: return "Q♣";//MAX_CARD
                 default: return "?";
             }
         }

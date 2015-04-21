@@ -38,7 +38,7 @@ namespace VisasIzspelesBitwise
 
         private const int HAND_SIZE = 8;
         private const int TABLE_SIZE = 2;
-        private int gameCount = 0;
+        private long gameCount = 0;
         private const int playerCount = 3;// constant for now
         private Player player1;
         private Player player2;
@@ -56,7 +56,7 @@ namespace VisasIzspelesBitwise
             player3.Next = player1;
 
             // Deal cards
-            int[] playerHands = { 0, 0, 0 };
+            int[] playerHands = { 0, 0, 0, 0 };
             List<int> deck = new List<int>();
             for (int i = 0; i < Deck.SIZE; i++)
                 deck.Add(1 << i);
@@ -65,30 +65,32 @@ namespace VisasIzspelesBitwise
             // Random sort
             //Random rand = new Random();
             //deck = deck.OrderBy(c => (int)rand.Next()).ToList();
-            for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
-                playerHands[i / HAND_SIZE] = playerHands[i / HAND_SIZE] | deck.ElementAt(i);
-            if ((playerHands[0] & playerHands[1] & playerHands[2]) != 0)
+            for (int i = 0; i < Deck.SIZE; i++)
+                    playerHands[i / HAND_SIZE] |=  deck.ElementAt(i);
+            if ((playerHands[0] ^ playerHands[1] ^ playerHands[2] ^ playerHands[3]) != Deck.FULL_DECK)
                 throw new Exception("Incorrect hands");
-
-            PrintHand(playerHands[0]);
-            PrintHand(playerHands[1]);
-            PrintHand(playerHands[2]);
 
             int handP1 = playerHands[0];
             int handP2 = playerHands[1];
             int handP3 = playerHands[2];
+            int tableHand = playerHands[3];
+            PrintHand(handP1);
+            PrintHand(handP2);
+            PrintHand(handP3);
+            PrintHand(tableHand);
 
             int[] moveHistory = new int[Deck.SIZE];
             int playedCard;
             int cardsLeft = handP1;
-            while (cardsLeft != 0) //TODO:Multithreading
+            while (cardsLeft != 0)
             {
                 playedCard = RemoveLastCard(ref cardsLeft);
-                PlayGame(moveHistory, 0, playedCard, playedCard, Deck.EMPTY_CARD, handP1, handP2, handP3, player1);
+                PlayGame(moveHistory, 0, playedCard, playedCard, Deck.EMPTY_CARD, handP1, handP2, handP3, 0, 0, 0, player1);
             }
         }
 
-        private void PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard, int handP1, int handP2, int handP3, Player activePlayer)
+        private void PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard,
+                              int handP1, int handP2, int handP3, int cardsP1, int cardsP2, int cardsP3, Player activePlayer)
         {
             int validMoves;
             moveHistory[moveCount++] = playedCard;
@@ -103,12 +105,18 @@ namespace VisasIzspelesBitwise
             if (moveCount % playerCount == 0)
             {
                 nextPlayer = GetWinner(moveHistory, moveCount, activePlayer);
-                if (nextPlayer == player1)
+                if (nextPlayer == player1) {
                     validMoves = handP1;
-                else if (nextPlayer == player2)
+                    cardsP1 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
+                }
+                else if (nextPlayer == player2) {
                     validMoves = handP2;
-                else //if (nextPlayer == player3)
+                    cardsP2 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
+                }
+                else {//if (nextPlayer == player3)
                     validMoves = handP3;
+                    cardsP3 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
+                }
             }
             else
             {
@@ -125,7 +133,7 @@ namespace VisasIzspelesBitwise
                 playedCard = RemoveLastCard(ref validMoves);
                 if (moveCount % playerCount == 0)
                     trickCard = playedCard;
-                PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, nextPlayer);
+                PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer);
             }
 
             // Status
@@ -135,6 +143,26 @@ namespace VisasIzspelesBitwise
                 if (gameCount % 1000000 == 0)
                     Console.WriteLine(gameCount);
                 PrintHistory(moveHistory);
+
+                nextPlayer = GetWinner(moveHistory, moveCount, activePlayer);
+                if (nextPlayer == player1)
+                {
+                    validMoves = handP1;
+                    cardsP1 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
+                }
+                else if (nextPlayer == player2)
+                {
+                    validMoves = handP2;
+                    cardsP2 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
+                }
+                else
+                {//if (nextPlayer == player3)
+                    validMoves = handP3;
+                    cardsP3 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
+                }
+                Console.WriteLine("P1:" + Deck.VALUE[cardsP1]);
+                Console.WriteLine("P2:" + Deck.VALUE[cardsP2]);
+                Console.WriteLine("P3:" + Deck.VALUE[cardsP3]);
             }
         }
 
