@@ -235,6 +235,18 @@ namespace VisasIzspelesBitwise
             Console.WriteLine();
         }
 
+        private int GetScore(int points)  // 3 spēlētāji, bez pulēm
+        {
+            //if (role == Player.Role.Lielais){
+            if (points == 0) return -8;
+            else if (points <= 30) return -6;
+            else if (points <= 60) return -4;
+            else if (points < 90) return 2;
+            else if (points < 120) return 4;
+            else if (points == 120) return 6;
+            return 0;
+        }
+
         //debug
         public void PrintBinaryInt(int n)
         {
