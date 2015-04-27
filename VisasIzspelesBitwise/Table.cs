@@ -45,6 +45,8 @@ namespace VisasIzspelesBitwise
         private Player player3;
         private Player table;
 
+        private int burriedCards;
+
         public void StartGame()
         {
             player1 = new Player("P1");
@@ -78,6 +80,7 @@ namespace VisasIzspelesBitwise
             PrintHand(handP2);
             PrintHand(handP3);
             PrintHand(tableHand);
+            burriedCards = tableHand;
 
             int[] moveHistory = new int[Deck.SIZE];
             int playedCard;
@@ -160,9 +163,9 @@ namespace VisasIzspelesBitwise
                     validMoves = handP3;
                     cardsP3 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
                 }
-                Console.WriteLine("P1:" + Deck.VALUE[cardsP1]);
-                Console.WriteLine("P2:" + Deck.VALUE[cardsP2]);
-                Console.WriteLine("P3:" + Deck.VALUE[cardsP3]);
+                Console.WriteLine("P1:" + Deck.VALUE[cardsP1] + " Lielais: " + GetScore(Deck.VALUE[cardsP1 | burriedCards]));
+                Console.WriteLine("P2:" + Deck.VALUE[cardsP2] + " Lielais: " + GetScore(Deck.VALUE[cardsP2 | burriedCards]));
+                Console.WriteLine("P3:" + Deck.VALUE[cardsP3] + " Lielais: " + GetScore(Deck.VALUE[cardsP3 | burriedCards]));
             }
         }
 
@@ -243,7 +246,7 @@ namespace VisasIzspelesBitwise
             else if (points <= 60) return -4;
             else if (points < 90) return 2;
             else if (points < 120) return 4;
-            else if (points == 120) return 6;
+            else if (points == 120) return 6;//Stiķis ar 0 punktiem?
             return 0;
         }
 
