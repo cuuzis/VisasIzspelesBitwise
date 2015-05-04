@@ -39,9 +39,6 @@ namespace VisasIzspelesBitwise
         private const int HAND_SIZE = 8;
         private const int TABLE_SIZE = 2;
         private long gameCount = 0;
-        private long gameScoreMin = 0;
-        private long gameScoreMax = 0;
-        private long gameScoreSum = 0;
         private const int playerCount = 3;// constant for now
         private Player player1;
         private Player player2;
@@ -95,9 +92,10 @@ namespace VisasIzspelesBitwise
             }
         }
 
-        private void PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard,
+        private double PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard,
                               int handP1, int handP2, int handP3, int cardsP1, int cardsP2, int cardsP3, Player activePlayer)
         {
+            double result = -10000;//debila konstante
             int validMoves;
             moveHistory[moveCount++] = playedCard;
             if (activePlayer == player1)
@@ -141,26 +139,17 @@ namespace VisasIzspelesBitwise
                     trickCard = playedCard;
                 // result = min/max(PlayGame(P1))
                 // Get related games and play them all. Average score.
-                PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer);
-                if (moveCount == 6) { // 1/2 game
-                    PrintHistory(moveHistory);
-                    Console.WriteLine("Game score {0}:{1}/{2}={3} Min:{4} Max:{5}", Deck.SHORTNAME(moveHistory[moveCount]), gameScoreSum, gameCount, gameScoreSum / gameCount, gameScoreMin, gameScoreMax);
-                    Console.ReadLine();
-                    //Reset score
-                    gameScoreMin = 0;
-                    gameScoreMax = 0;
-                    gameScoreSum = 0;
-                    gameCount = 0;//ruins total game count
-                }
+                if (result == -10000)
+                    result = PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer);
+                else if (activePlayer == player1)
+                    result = Math.Max(result, PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer));
+                else
+                    result = Math.Min(result, PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer));
             }
 
-            // Status
+            // End of game
             if (moveCount == Deck.SIZE - TABLE_SIZE)
             {
-                if (gameCount % 1000000 == 0)
-                    Console.WriteLine(gameCount);
-                //PrintHistory(moveHistory);
-
                 nextPlayer = GetWinner(moveHistory, moveCount, activePlayer);
                 if (nextPlayer == player1)
                 {
@@ -181,14 +170,19 @@ namespace VisasIzspelesBitwise
                 Console.WriteLine("P2:" + Deck.VALUE[cardsP2] + " Lielais: " + GetScore(Deck.VALUE[cardsP2 | burriedCards]));
                 Console.WriteLine("P3:" + Deck.VALUE[cardsP3] + " Lielais: " + GetScore(Deck.VALUE[cardsP3 | burriedCards]));*/
                 gameCount++;
-                int newScore = GetScore(Deck.VALUE[cardsP1 | burriedCards]);
-                gameScoreSum += newScore;// for average score
+                result = GetScore(Deck.VALUE[cardsP1 | burriedCards]);
+                /*gameScoreSum += newScore;// for average score
                 if (newScore < gameScoreMin)// for min score // if p1 gājiens => max
                     gameScoreMin = newScore;
                 if (gameScoreMax < newScore)// for min score //
-                    gameScoreMax = newScore;
-                //Console.WriteLine("Game score: "+ gameScore);  
+                    gameScoreMax = newScore;  */
             }
+            if (moveCount == 9) {
+                PrintHistory(moveHistory, moveCount);
+                Console.WriteLine(Deck.SHORTNAME(moveHistory[moveCount]) + ": " + result + "  games: " + gameCount);
+                Console.ReadKey();
+            }
+            return result;
         }
 
         private Player GetWinner(int[] moveHistory, int moveCount, Player activePlayer)
@@ -231,7 +225,7 @@ namespace VisasIzspelesBitwise
         {
             return hand & -hand;
         }
-
+        
         private void RemoveCard(ref int hand, int card)
         {
             hand = hand ^ card;
@@ -242,11 +236,12 @@ namespace VisasIzspelesBitwise
             return hand1 & hand2;
         }
 
-        private void PrintHistory(int[] moveHistory)
+        private void PrintHistory(int[] moveHistory, int moveCount)
         {
             if (!Program.WRITE_TO_CONSOLE && !Program.WRITE_TO_FILE)
                 return;
-            for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
+            //for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
+            for (int i = 0; i < moveCount; i++)
                 Console.Write(Deck.SHORTNAME(moveHistory[i]) + " ");
             Console.WriteLine();
         }
