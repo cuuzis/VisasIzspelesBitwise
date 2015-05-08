@@ -19,12 +19,14 @@ namespace VisasIzspelesBitwise
 
         static void Main(string[] args)
         {
-            Deck myDeck = new Deck();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+
+            Deck myDeck = new Deck();//static is 10x slower, why?
 
             if (WRITE_TO_FILE)
                 File.CreateText(FILENAME).Close();
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
 
 
             Table table = new Table();

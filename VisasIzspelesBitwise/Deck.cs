@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// Utility class
 namespace VisasIzspelesBitwise
 {
-    class Deck
+    //public static class Deck
+    public class Deck
     {
         public const int SIZE = 26;
         public const int EMPTY_CARD = 0;
@@ -17,6 +19,7 @@ namespace VisasIzspelesBitwise
         public static readonly int[] STRONGER = new int[MAX_CARD + 1];
         public static readonly int[] VALUE = new int[FULL_DECK +1];
 
+        //static Deck()
         public Deck()
         {
             for (int card = 1; card <= MAX_CARD; card = (card << 1))
@@ -168,6 +171,114 @@ namespace VisasIzspelesBitwise
                 case 33554432: return "Q♣";//MAX_CARD
                 default: return "?";
             }
+        }
+
+
+        // Public utility methods
+
+        public static Player GetWinner(int[] moveHistory, int moveCount, Player activePlayer)
+        {
+            if (IsStronger(moveHistory[moveCount - 2], moveHistory[moveCount - 3]))
+            {
+                if (IsStronger(moveHistory[moveCount - 1], moveHistory[moveCount - 2]))
+                    return activePlayer;
+                else
+                    return activePlayer.Next.Next;
+            }
+            else if (IsStronger(moveHistory[moveCount - 1], moveHistory[moveCount - 3]))
+                return activePlayer;
+            else
+                return activePlayer.Next;
+        }
+
+        public static int GetValidMoves(int hand, int trickCard)
+        {
+            int validMoves = Intersection(hand, Deck.VALID_MOVES[trickCard]);
+            if (validMoves == 0)
+                validMoves = hand;
+            return validMoves;
+        }
+
+        /// <summary>
+        /// Returns true if card1 > card2.
+        /// </summary>
+        public static bool IsStronger(int card1, int card2)
+        {
+            return ((card1 & Deck.STRONGER[card2]) != 0);
+        }
+        public static int RemoveLastCard(ref int hand)
+        {
+            int card = hand & -hand;
+            hand = hand ^ card;
+            return card;
+        }
+        public static int GetLastCard(int hand)
+        {
+            return hand & -hand;
+        }
+
+        public static void RemoveCard(ref int hand, int card)
+        {
+            hand = hand ^ card;
+        }
+
+        public static int Intersection(int hand1, int hand2)
+        {
+            return hand1 & hand2;
+        }
+
+        public static void PrintHistory(int[] moveHistory, int moveCount)
+        {
+            if (!Program.WRITE_TO_CONSOLE && !Program.WRITE_TO_FILE)
+                return;
+            //for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
+            for (int i = 0; i < moveCount; i++)
+                Console.Write(Deck.SHORTNAME(moveHistory[i]) + " ");
+            Console.WriteLine();
+        }
+
+        public static void PrintHand(int hand, string message = "")
+        {
+            if (!Program.WRITE_TO_CONSOLE && !Program.WRITE_TO_FILE)
+                return;
+            if (message != "")
+                Console.Write(message + ": ");
+            while (hand != 0)
+                Console.Write(Deck.SHORTNAME(RemoveLastCard(ref hand)) + " ");
+            Console.WriteLine();
+        }
+
+        public static int GetScore(int points)  // 3 spēlētāji, bez pulēm
+        {
+            //if (role == Player.Role.Lielais){
+            if (points == 0) return -8;
+            else if (points <= 30) return -6;
+            else if (points <= 60) return -4;
+            else if (points < 90) return 2;
+            else if (points < 120) return 4;
+            else if (points == 120) return 6;//Stiķis ar 0 punktiem?
+            return 0;
+        }
+
+        //debug
+        public static void PrintBinaryInt(int n)
+        {
+            char[] b = new char[32];
+            int pos = 31;
+
+            for (int i = 0; i < 32; i++)
+            {
+                if ((n & (1 << i)) != 0)
+                {
+                    b[pos] = '1';
+                }
+                else
+                {
+                    b[pos] = '0';
+                }
+                pos--;
+            }
+            Console.WriteLine(b);
         }
     }
 }

@@ -45,17 +45,18 @@ namespace VisasIzspelesBitwise
         private Player player3;
         private Player table;
 
-        private int burriedCards;
-
         public void StartGame()
         {
-            player1 = new Player("P1");
-            player2 = new Player("P2");
-            player3 = new Player("P3");
-            table = new Player("Table");
+            player1 = new Player(0, "P1");
+            player2 = new Player(1, "P2");
+            player3 = new Player(2, "P3");
+            table = new Player(3, "Table");
             player1.Next = player2;
             player2.Next = player3;
             player3.Next = player1;
+            player1.Role = Player.PlayerRole.Lielais;
+            player2.Role = Player.PlayerRole.Mazais;
+            player3.Role = Player.PlayerRole.Mazais;
 
             // Deal cards
             int[] playerHands = { 0, 0, 0, 0 };
@@ -72,220 +73,56 @@ namespace VisasIzspelesBitwise
             if ((playerHands[0] ^ playerHands[1] ^ playerHands[2] ^ playerHands[3]) != Deck.FULL_DECK)
                 throw new Exception("Incorrect hands");
 
-            int handP1 = playerHands[0];
-            int handP2 = playerHands[1];
-            int handP3 = playerHands[2];
-            int tableHand = playerHands[3];
-            PrintHand(handP1);
-            PrintHand(handP2);
-            PrintHand(handP3);
-            PrintHand(tableHand);
-            burriedCards = tableHand;
+            // Output
+            Console.WriteLine("Dealt cards: ");
+            Deck.PrintHand(playerHands[0], "P1");
+            Deck.PrintHand(playerHands[1], "P2");
+            Deck.PrintHand(playerHands[2], "P3");
+            Deck.PrintHand(playerHands[3], "table");
+            Console.WriteLine();
+            PlayGame(playerHands, player1);
+        }
 
+        private void PlayGame(int[] playerHands, Player activePlayer)
+        {
+            Player firstMover = activePlayer;
             int[] moveHistory = new int[Deck.SIZE];
-            int playedCard;
-            int cardsLeft = handP1;
-            while (cardsLeft != 0)
-            {
-                playedCard = RemoveLastCard(ref cardsLeft);
-                PlayGame(moveHistory, 0, playedCard, playedCard, Deck.EMPTY_CARD, handP1, handP2, handP3, 0, 0, 0, player1);
-            }
-        }
-
-        private double PlayGame(int[] moveHistory, int moveCount, int playedCard, int trickCard, int highestCard,
-                              int handP1, int handP2, int handP3, int cardsP1, int cardsP2, int cardsP3, Player activePlayer)
-        {
-            double result = -10000;//debila konstante
+            int trickCard = Deck.EMPTY_CARD;
             int validMoves;
-            moveHistory[moveCount++] = playedCard;
-            if (activePlayer == player1)
-                RemoveCard(ref handP1, playedCard);
-            else if (activePlayer == player2)
-                RemoveCard(ref handP2, playedCard);
-            else// if (activePlayer == player3)
-                RemoveCard(ref handP3, playedCard);
+            int playedCard;
+            int[] playerTricks = new int[playerCount];
 
-            Player nextPlayer;
-            if (moveCount % playerCount == 0)
+            for (int moveCount = 0; moveCount < Deck.SIZE - TABLE_SIZE; moveCount++ )
             {
-                nextPlayer = GetWinner(moveHistory, moveCount, activePlayer);
-                if (nextPlayer == player1) {
-                    validMoves = handP1;
-                    cardsP1 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
-                }
-                else if (nextPlayer == player2) {
-                    validMoves = handP2;
-                    cardsP2 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
-                }
-                else {//if (nextPlayer == player3)
-                    validMoves = handP3;
-                    cardsP3 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
-                }
-            }
-            else
-            {
-                nextPlayer = activePlayer.Next;
-                if (activePlayer == player1)
-                    validMoves = GetValidMoves(handP2, trickCard);
-                else if (activePlayer == player2)
-                    validMoves = GetValidMoves(handP3, trickCard);
-                else// if (activePlayer == player3)
-                    validMoves = GetValidMoves(handP1, trickCard);
-            }
-            while (validMoves != 0)
-            {
-                playedCard = RemoveLastCard(ref validMoves);
+                validMoves = Deck.GetValidMoves(playerHands[activePlayer.ID], trickCard);
+                playedCard = activePlayer.PlayCard(moveHistory, 0, validMoves, playerHands); //!playerHands
+                moveHistory[moveCount] = playedCard;
+                Deck.RemoveCard(ref playerHands[activePlayer.ID], playedCard);
                 if (moveCount % playerCount == 0)
-                    trickCard = playedCard;
-                // result = min/max(PlayGame(P1))
-                // Get related games and play them all. Average score.
-                if (result == -10000)
-                    result = PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer);
-                else if (activePlayer == player1)
-                    result = Math.Max(result, PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer));
-                else
-                    result = Math.Min(result, PlayGame(moveHistory, moveCount, playedCard, trickCard, highestCard, handP1, handP2, handP3, cardsP1, cardsP2, cardsP3, nextPlayer));
-            }
-
-            // End of game
-            if (moveCount == Deck.SIZE - TABLE_SIZE)
-            {
-                nextPlayer = GetWinner(moveHistory, moveCount, activePlayer);
-                if (nextPlayer == player1)
-                {
-                    validMoves = handP1;
-                    cardsP1 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
-                }
-                else if (nextPlayer == player2)
-                {
-                    validMoves = handP2;
-                    cardsP2 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
+                    trickCard = moveHistory[moveCount];
+                if (moveCount % playerCount == 2) {
+                    activePlayer = Deck.GetWinner(moveHistory, moveCount + 1, activePlayer);
+                    playerTricks[activePlayer.ID] |= moveHistory[moveCount] | moveHistory[moveCount - 1] | moveHistory[moveCount - 2];
                 }
                 else
-                {//if (nextPlayer == player3)
-                    validMoves = handP3;
-                    cardsP3 |= moveHistory[moveCount - 3] | moveHistory[moveCount - 2] | moveHistory[moveCount - 1];
-                }
-                /*Console.WriteLine("P1:" + Deck.VALUE[cardsP1] + " Lielais: " + GetScore(Deck.VALUE[cardsP1 | burriedCards]));
-                Console.WriteLine("P2:" + Deck.VALUE[cardsP2] + " Lielais: " + GetScore(Deck.VALUE[cardsP2 | burriedCards]));
-                Console.WriteLine("P3:" + Deck.VALUE[cardsP3] + " Lielais: " + GetScore(Deck.VALUE[cardsP3 | burriedCards]));*/
-                gameCount++;
-                result = GetScore(Deck.VALUE[cardsP1 | burriedCards]);
-                /*gameScoreSum += newScore;// for average score
-                if (newScore < gameScoreMin)// for min score // if p1 gājiens => max
-                    gameScoreMin = newScore;
-                if (gameScoreMax < newScore)// for min score //
-                    gameScoreMax = newScore;  */
+                    activePlayer = activePlayer.Next;
             }
-            if (moveCount == 9) {
-                PrintHistory(moveHistory, moveCount);
-                Console.WriteLine(Deck.SHORTNAME(moveHistory[moveCount]) + ": " + result + "  games: " + gameCount);
-                Console.ReadKey();
-            }
-            return result;
-        }
-
-        private Player GetWinner(int[] moveHistory, int moveCount, Player activePlayer)
-        {
-            if ( IsStronger(moveHistory[moveCount-2], moveHistory[moveCount-3]) )
-            {
-                if ( IsStronger(moveHistory[moveCount-1], moveHistory[moveCount-2]) )
-                    return activePlayer;
-                else
-                    return activePlayer.Next.Next;
-            }
-            else if ( IsStronger(moveHistory[moveCount-1], moveHistory[moveCount-3]) )
-                return activePlayer;
-            else
-                return activePlayer.Next;
-        }
-
-        private int GetValidMoves(int hand, int trickCard)
-        {
-            int validMoves = Intersection(hand, Deck.VALID_MOVES[trickCard]);
-            if (validMoves == 0)
-                validMoves = hand;
-            return validMoves;
-        }
-
-        /// <summary>
-        /// Returns true if card1 > card2.
-        /// </summary>
-        private bool IsStronger(int card1, int card2)
-        {
-            return ((card1 & Deck.STRONGER[card2]) != 0);
-        }
-        private int RemoveLastCard(ref int hand)
-        {
-            int card = hand & -hand;
-            hand = hand ^ card;
-            return card;
-        }
-        private int GetLastCard(int hand)
-        {
-            return hand & -hand;
-        }
-        
-        private void RemoveCard(ref int hand, int card)
-        {
-            hand = hand ^ card;
-        }
-
-        private int Intersection(int hand1, int hand2)
-        {
-            return hand1 & hand2;
-        }
-
-        private void PrintHistory(int[] moveHistory, int moveCount)
-        {
-            if (!Program.WRITE_TO_CONSOLE && !Program.WRITE_TO_FILE)
-                return;
-            //for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
-            for (int i = 0; i < moveCount; i++)
-                Console.Write(Deck.SHORTNAME(moveHistory[i]) + " ");
+            // Output
+            int burriedCards = playerHands[3];
+            activePlayer = firstMover;
+            Console.WriteLine("Results:");
+            Console.WriteLine("P" + activePlayer.ID);
+            Deck.PrintHand(playerTricks[activePlayer.ID]);
+            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
+            activePlayer = activePlayer.Next;
+            Console.WriteLine("P" + activePlayer.ID);
+            Deck.PrintHand(playerTricks[activePlayer.ID]);
+            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
+            activePlayer = activePlayer.Next;
+            Console.WriteLine("P" + activePlayer.ID);
+            Deck.PrintHand(playerTricks[activePlayer.ID]);
+            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             Console.WriteLine();
-        }
-
-        private void PrintHand(int hand)
-        {
-            if (!Program.WRITE_TO_CONSOLE && !Program.WRITE_TO_FILE)
-                return;
-            while (hand != 0)
-                Console.Write(Deck.SHORTNAME(RemoveLastCard(ref hand)) + " ");
-            Console.WriteLine();
-        }
-
-        private int GetScore(int points)  // 3 spēlētāji, bez pulēm
-        {
-            //if (role == Player.Role.Lielais){
-            if (points == 0) return -8;
-            else if (points <= 30) return -6;
-            else if (points <= 60) return -4;
-            else if (points < 90) return 2;
-            else if (points < 120) return 4;
-            else if (points == 120) return 6;//Stiķis ar 0 punktiem?
-            return 0;
-        }
-
-        //debug
-        public void PrintBinaryInt(int n)
-        {
-            char[] b = new char[32];
-            int pos = 31;
-
-            for (int i = 0; i < 32; i++ )
-            {
-                if ((n & (1 << i)) != 0)
-                {
-                    b[pos] = '1';
-                }
-                else
-                {
-                    b[pos] = '0';
-                }
-                pos--;
-            }
-            Console.WriteLine(b);
         }
     }
 }
