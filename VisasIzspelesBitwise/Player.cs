@@ -14,6 +14,7 @@ namespace VisasIzspelesBitwise
         public string Name { get; private set; }
         public Player Next;
 
+        private const int START_FROM = 9;
         private int playerCount = 3;
         private int burriedCards;
 
@@ -22,17 +23,12 @@ namespace VisasIzspelesBitwise
             ID = id;
             Name = name;
         }
-
-        public int LowestCard(int validMoves)
-        {
-            return validMoves & -validMoves;
-        }
         public int RandomCard(int validMoves)
         {
             throw new NotImplementedException();
         }
 
-        public int PlayCard(int[] moveHistory, int moveCount, int validMoves, int[] playerHands)
+        public int PlayCard(int[] moveHistory, int moveCount, int validMoves, int trickCard, int[] playerHands)
         {
             //if (moveCount < 12)
             //    return LowestCard(validMoves);
@@ -47,16 +43,22 @@ namespace VisasIzspelesBitwise
             double score = -20;
             double newScore;
             int playedCard;
-            int bestCard = LowestCard(validMoves);
+            int bestCard = Deck.GetLastCard(validMoves);
             while (validMoves != 0)
             {
                 playedCard = Deck.RemoveLastCard(ref validMoves);
-                newScore = SimulateGame(hist, moveCount, playedCard, Deck.EMPTY_CARD, hand0, hand1, hand2, 0, 0, 0, this);
+                newScore = SimulateGame(hist, moveCount, playedCard, trickCard, hand0, hand1, hand2, 0, 0, 0, this);
                 if (score < newScore)
                 {
                     score = newScore;
                     bestCard = playedCard;
+                    //output
+                    Console.WriteLine(score + " Tree:");
+                    Deck.PrintHistory(hist, 24);
+                    Console.WriteLine();
                 }
+                if (moveCount < START_FROM)
+                    break;
             }
             return bestCard;
         }
@@ -66,11 +68,6 @@ namespace VisasIzspelesBitwise
         private double SimulateGame(int[] moveHistory, int moveCount, int playedCard, int trickCard,
             int hand0, int hand1, int hand2, int cards0, int cards1, int cards2, Player activePlayer)
         {
-            if (moveCount < 12)
-                return 0;
-            //Random rand = new Random();
-            //return rand.Next(-10, 10);
-            //for each valid move: find average score
             double result = -10000;
             int validMoves;
             moveHistory[moveCount++] = playedCard;
@@ -115,15 +112,23 @@ namespace VisasIzspelesBitwise
             {
                 playedCard = Deck.RemoveLastCard(ref validMoves);
                 if (moveCount % playerCount == 0)
+                {
+                    //Deck.PrintHistory(moveHistory, moveCount+3); Console.WriteLine(" "+Deck.SHORTNAME(playedCard)); Console.ReadKey();
                     trickCard = playedCard;
+                }
                 // result = min/max(PlayGame(P1))
                 // Get related games and play them all. Average score.
+                double newScore = SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, cards0, cards1, cards2, nextPlayer);
                 if (result == -10000)
-                    result = SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, cards0, cards1, cards2, nextPlayer);
+                    result = newScore;
                 else if (activePlayer.Role == PlayerRole.Lielais)
-                    result = Math.Max(result, result = SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, cards0, cards1, cards2, nextPlayer));
+                    result = Math.Max(result, newScore);
                 else
-                    result = Math.Min(result, result = SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, cards0, cards1, cards2, nextPlayer));
+                    result = Math.Min(result, newScore);
+
+                // 
+                if (moveCount < START_FROM)
+                    break;
             }
 
             // End of game
@@ -147,7 +152,6 @@ namespace VisasIzspelesBitwise
                 }
                 //gameCount++;
                 result = Deck.GetScore(Deck.VALUE[cards0 | burriedCards]);
-                //PrintHistory(moveHistory, moveCount);
                 //Console.WriteLine(Deck.VALUE[cards0 | burriedCards] + ": " + result); Console.ReadKey();
             }
             return result;

@@ -66,14 +66,23 @@ namespace VisasIzspelesBitwise
             // My random sort for debug
             deck = deck.OrderBy(c => GetNumTMP()).ToList();
             // Random sort
-            //Random rand = new Random();
-            //deck = deck.OrderBy(c => (int)rand.Next()).ToList();
+            Random rand = new Random();
+            deck = deck.OrderBy(c => (int)rand.Next()).ToList();
             for (int i = 0; i < Deck.SIZE; i++)
                     playerHands[i / HAND_SIZE] |=  deck.ElementAt(i);
             if ((playerHands[0] ^ playerHands[1] ^ playerHands[2] ^ playerHands[3]) != Deck.FULL_DECK)
                 throw new Exception("Incorrect hands");
 
+            playerHands[0] = Convert.ToInt32("00000000010011000000100001100011", 2);
+            playerHands[1] = Convert.ToInt32("00000010100100000010010100001100", 2);
+            playerHands[2] = Convert.ToInt32("00000001001000111000001010010000", 2);
+            playerHands[3] = Convert.ToInt32("00000000000000000101000000000000", 2);
+
             // Output
+            Deck.PrintBinaryInt(playerHands[0]);
+            Deck.PrintBinaryInt(playerHands[1]);
+            Deck.PrintBinaryInt(playerHands[2]);
+            Deck.PrintBinaryInt(playerHands[3]);
             Console.WriteLine("Dealt cards: ");
             Deck.PrintHand(playerHands[0], "P1");
             Deck.PrintHand(playerHands[1], "P2");
@@ -95,7 +104,7 @@ namespace VisasIzspelesBitwise
             for (int moveCount = 0; moveCount < Deck.SIZE - TABLE_SIZE; moveCount++ )
             {
                 validMoves = Deck.GetValidMoves(playerHands[activePlayer.ID], trickCard);
-                playedCard = activePlayer.PlayCard(moveHistory, 0, validMoves, playerHands); //!playerHands
+                playedCard = activePlayer.PlayCard(moveHistory, 0, validMoves, trickCard, playerHands); //!playerHands
                 moveHistory[moveCount] = playedCard;
                 Deck.RemoveCard(ref playerHands[activePlayer.ID], playedCard);
                 if (moveCount % playerCount == 0)
@@ -103,6 +112,7 @@ namespace VisasIzspelesBitwise
                 if (moveCount % playerCount == 2) {
                     activePlayer = Deck.GetWinner(moveHistory, moveCount + 1, activePlayer);
                     playerTricks[activePlayer.ID] |= moveHistory[moveCount] | moveHistory[moveCount - 1] | moveHistory[moveCount - 2];
+                    trickCard = Deck.EMPTY_CARD;
                 }
                 else
                     activePlayer = activePlayer.Next;
@@ -111,15 +121,16 @@ namespace VisasIzspelesBitwise
             int burriedCards = playerHands[3];
             activePlayer = firstMover;
             Console.WriteLine("Results:");
-            Console.WriteLine("P" + activePlayer.ID);
+            Deck.PrintHistory(moveHistory, 24);
+            Console.WriteLine("P" + (activePlayer.ID+1));
             Deck.PrintHand(playerTricks[activePlayer.ID]);
             Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             activePlayer = activePlayer.Next;
-            Console.WriteLine("P" + activePlayer.ID);
+            Console.WriteLine("P" + (activePlayer.ID+1));
             Deck.PrintHand(playerTricks[activePlayer.ID]);
             Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             activePlayer = activePlayer.Next;
-            Console.WriteLine("P" + activePlayer.ID);
+            Console.WriteLine("P" + (activePlayer.ID+1));
             Deck.PrintHand(playerTricks[activePlayer.ID]);
             Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             Console.WriteLine();
