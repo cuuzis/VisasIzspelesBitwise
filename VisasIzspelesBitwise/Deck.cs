@@ -15,9 +15,14 @@ namespace VisasIzspelesBitwise
         public const int MAX_CARD = 33554432;
         public const int FULL_DECK = MAX_CARD * 2 - 1;
 
+        public const double MAX_SCORE = 10000;
+        public const double MIN_SCORE = -10000;
+
         public static readonly int[] VALID_MOVES = new int[MAX_CARD + 1];
         public static readonly int[] STRONGER = new int[MAX_CARD + 1];
         public static readonly int[] VALUE = new int[FULL_DECK +1];
+
+        private static Random rand = new Random();
 
         //static Deck()
         public Deck()
@@ -106,8 +111,8 @@ namespace VisasIzspelesBitwise
                 case 2097152: return 62914560;
                 case 4194304: return 58720256;
                 case 8388608: return 50331648;
-                case 16777216: return 33554432;//MAX_CARD
-                case 33554432: return 0;
+                case 16777216: return 33554432;
+                case 33554432: return 0;//MAX_CARD
                 default: return 0;
             }
         }
@@ -227,11 +232,28 @@ namespace VisasIzspelesBitwise
             return hand1 & hand2;
         }
 
+        public static int CountCards(int hand)
+        {
+            int count = 0;
+            while (hand != 0)
+            {
+                hand &= hand - 1;
+                count++;
+            }
+            return count;
+        }
+
+        public static int GetRandomCard(int hand)
+        {
+            int card = 0;
+            int count = CountCards(hand);
+            for (int i = 0; i < rand.Next(1, count); i++)
+                card = RemoveLastCard(ref hand);
+            return card;
+        }
+
         public static void PrintHistory(int[] moveHistory, int moveCount)
         {
-            if (!Program.WRITE_TO_CONSOLE && !Program.WRITE_TO_FILE)
-                return;
-            //for (int i = 0; i < Deck.SIZE - TABLE_SIZE; i++)
             for (int i = 0; i < moveCount; i++)
                 Console.Write(Deck.SHORTNAME(moveHistory[i]) + " ");
             Console.WriteLine();
@@ -239,8 +261,6 @@ namespace VisasIzspelesBitwise
 
         public static void PrintHand(int hand, string message = "")
         {
-            if (!Program.WRITE_TO_CONSOLE && !Program.WRITE_TO_FILE)
-                return;
             if (message != "")
                 Console.Write(message + ": ");
             while (hand != 0)
@@ -248,9 +268,8 @@ namespace VisasIzspelesBitwise
             Console.WriteLine();
         }
 
-        public static int GetScore(int points)  // 3 spēlētāji, bez pulēm
+        public static int GetScore(int points)  // Lielā rezultāts - 3 spēlētāji, bez pulēm
         {
-            //if (role == Player.Role.Lielais){
             if (points == 0) return -8;
             else if (points <= 30) return -6;
             else if (points <= 60) return -4;

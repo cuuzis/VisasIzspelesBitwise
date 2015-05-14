@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VisasIzspelesBitwise
 {
-    class Table
+    public class Table
     {
         // Debug + profiling
         private int tmp = 0;
@@ -36,10 +36,9 @@ namespace VisasIzspelesBitwise
         }
 
 
-        private const int HAND_SIZE = 8;
-        private const int TABLE_SIZE = 2;
-        private long gameCount = 0;
-        private const int playerCount = 3;// constant for now
+        public const int HAND_SIZE = 8;
+        public const int TABLE_SIZE = 2;
+        public int playerCount = 3;// constant for now
         private Player player1;
         private Player player2;
         private Player player3;
@@ -47,10 +46,10 @@ namespace VisasIzspelesBitwise
 
         public void StartGame()
         {
-            player1 = new Player(0, "P1");
-            player2 = new Player(1, "P2");
-            player3 = new Player(2, "P3");
-            table = new Player(3, "Table");
+            player1 = new Player(this, 0, "P1");
+            player2 = new Player(this, 1, "P2");
+            player3 = new Player(this, 2, "P3");
+            table = new Player(this, 3, "Table");
             player1.Next = player2;
             player2.Next = player3;
             player3.Next = player1;
@@ -73,10 +72,10 @@ namespace VisasIzspelesBitwise
             if ((playerHands[0] ^ playerHands[1] ^ playerHands[2] ^ playerHands[3]) != Deck.FULL_DECK)
                 throw new Exception("Incorrect hands");
 
-            playerHands[0] = Convert.ToInt32("00000000010011000000100001100011", 2);
-            playerHands[1] = Convert.ToInt32("00000010100100000010010100001100", 2);
-            playerHands[2] = Convert.ToInt32("00000001001000111000001010010000", 2);
-            playerHands[3] = Convert.ToInt32("00000000000000000101000000000000", 2);
+            /*playerHands[0] = Convert.ToInt32("00000010100001000001000110010001", 2);
+            playerHands[1] = Convert.ToInt32("00000000001000110110001001001000", 2);
+            playerHands[2] = Convert.ToInt32("00000001000110001000110000100010", 2);
+            playerHands[3] = Convert.ToInt32("00000000010000000000000000000100", 2);*/
 
             // Output
             Deck.PrintBinaryInt(playerHands[0]);
@@ -104,7 +103,7 @@ namespace VisasIzspelesBitwise
             for (int moveCount = 0; moveCount < Deck.SIZE - TABLE_SIZE; moveCount++ )
             {
                 validMoves = Deck.GetValidMoves(playerHands[activePlayer.ID], trickCard);
-                playedCard = activePlayer.PlayCard(moveHistory, 0, validMoves, trickCard, playerHands); //!playerHands
+                playedCard = activePlayer.PlayCard(moveHistory, moveCount, playerTricks, validMoves, trickCard, playerHands); //!playerHands
                 moveHistory[moveCount] = playedCard;
                 Deck.RemoveCard(ref playerHands[activePlayer.ID], playedCard);
                 if (moveCount % playerCount == 0)
@@ -122,15 +121,12 @@ namespace VisasIzspelesBitwise
             activePlayer = firstMover;
             Console.WriteLine("Results:");
             Deck.PrintHistory(moveHistory, 24);
-            Console.WriteLine("P" + (activePlayer.ID+1));
             Deck.PrintHand(playerTricks[activePlayer.ID]);
             Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             activePlayer = activePlayer.Next;
-            Console.WriteLine("P" + (activePlayer.ID+1));
             Deck.PrintHand(playerTricks[activePlayer.ID]);
             Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             activePlayer = activePlayer.Next;
-            Console.WriteLine("P" + (activePlayer.ID+1));
             Deck.PrintHand(playerTricks[activePlayer.ID]);
             Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             Console.WriteLine();

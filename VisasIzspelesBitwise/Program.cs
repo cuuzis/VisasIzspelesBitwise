@@ -12,8 +12,7 @@ namespace VisasIzspelesBitwise
     class Program
     {
         // Hardcoded params
-        public const bool WRITE_TO_CONSOLE = true;
-        public const bool WRITE_TO_FILE = false;
+        //public const bool WRITE_TO_CONSOLE = true;
         public static String FILENAME = "izspeles.txt";
 
 
@@ -24,9 +23,6 @@ namespace VisasIzspelesBitwise
 
 
             Deck myDeck = new Deck();//static is 10x slower, why?
-
-            if (WRITE_TO_FILE)
-                File.CreateText(FILENAME).Close();
 
 
             Table table = new Table();
