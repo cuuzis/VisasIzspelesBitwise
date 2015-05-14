@@ -28,7 +28,7 @@ namespace VisasIzspelesBitwise
         public int PlayCard(int[] moveHistory, int moveCount, int[] playerTricks, int validMoves, int trickCard, int[] playerHands)
         {
             if (moveCount < START_FROM)
-                return Deck.GetLastCard(validMoves);
+                return Deck.GetRandomCard(validMoves);
 
             int[] hist = (int[])moveHistory.Clone();
             // int[] hands = (int[])playerHands.Clone(); // open hands for now
@@ -72,11 +72,6 @@ namespace VisasIzspelesBitwise
         private double SimulateGame(int[] moveHistory, int moveCount, int playedCard, int trickCard,
             int hand0, int hand1, int hand2, int burriedCards, int cards0, int cards1, int cards2, ref long gameCount)
         {
-            double score;
-            if (this.Role == PlayerRole.Lielais)
-                score = Deck.MIN_SCORE;
-            else
-                score = Deck.MAX_SCORE;
             int validMoves;
             if (moveCount % this.Table.playerCount == 0)
                 trickCard = playedCard;
@@ -118,11 +113,16 @@ namespace VisasIzspelesBitwise
                 else// if (nextPlayer.ID == 2)
                     validMoves = Deck.GetValidMoves(hand2, trickCard);
             }
+            double score;
+            if (nextPlayer.Role == PlayerRole.Lielais)
+                score = Deck.MIN_SCORE;
+            else
+                score = Deck.MAX_SCORE;
             while (validMoves != 0)
             {
                 playedCard = Deck.RemoveLastCard(ref validMoves);
                 double newScore = nextPlayer.SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, burriedCards, cards0, cards1, cards2, ref gameCount);
-                if (this.Role == PlayerRole.Lielais)
+                if (nextPlayer.Role == PlayerRole.Lielais)
                     score = Math.Max(score, newScore);
                 else
                     score = Math.Min(score, newScore);
@@ -131,7 +131,8 @@ namespace VisasIzspelesBitwise
             // End of game
             if (moveCount == this.Table.playerCount * Table.HAND_SIZE)
             {
-                score = Deck.GetScore(Deck.VALUE[cards0 | burriedCards]);
+                //score = Deck.GetScore(Deck.VALUE[cards0 | burriedCards]);  // round score
+                score = Deck.VALUE[cards0 | burriedCards];                  // round points
                 gameCount++;
                 /*if (score == -6 && dbg)
                 {
