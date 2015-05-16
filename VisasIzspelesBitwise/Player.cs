@@ -60,10 +60,17 @@ namespace VisasIzspelesBitwise
                 if (this.Role == PlayerRole.Lielais)
                     unknownCards ^= burriedCards;
 
+
+                Console.WriteLine(moveCount);
+                Deck.PrintBinaryInt(playerHands[this.ID]);
+                Deck.PrintBinaryInt(playerHands[(this.ID+1)%3]);
+                Deck.PrintBinaryInt(playerHands[(this.ID+2)%3]);
+                Console.WriteLine(moveCount);
+
                 //int hnd = Convert.ToInt32("00000010100001000001000110010001", 2);
                 Deck.PrintBinaryInt(unknownCards);
-                Console.WriteLine(moveCount);
-                Combine(unknownCards, 0, 0, 2);
+                foreach (int i in Combine(unknownCards, 0, 0, 6))
+                    Deck.PrintBinaryInt(i);
                 Console.ReadKey();
 
                 //foreach card combo:
@@ -81,18 +88,19 @@ namespace VisasIzspelesBitwise
             return bestCard;
         }
 
-        private void Combine(int hand, int a, int n, int size)
+        private IEnumerable<int> Combine(int hand, int a, int n, int size)
         {
             if (n == size)
             {
                 // Do stuff
-                Deck.PrintBinaryInt(a);
-                return;
+                //Deck.PrintBinaryInt(a);
+                yield return a;
             }
             while (hand != 0)
             {
                 int b = Deck.RemoveLastCard(ref hand);
-                Combine(hand, a | b, n + 1, size);
+                foreach (int i in Combine(hand, a | b, n + 1, size))
+                    yield return i;
             }
         }
 
