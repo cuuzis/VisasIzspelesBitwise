@@ -31,15 +31,18 @@ namespace VisasIzspelesBitwise
                 return Deck.GetRandomCard(validMoves);
 
             int[] hist = (int[])moveHistory.Clone();
-            // int[] hands = (int[])playerHands.Clone(); // open hands for now
+
+            // for playing with open hands:
             int hand0 = playerHands[0];
             int hand1 = playerHands[1];
             int hand2 = playerHands[2];
             int burriedCards = playerHands[3];
+
+            // player cards won:
             int cards0 = playerTricks[0];
             int cards1 = playerTricks[1];
             int cards2 = playerTricks[2];
-
+            
             double score;
             if (this.Role == PlayerRole.Lielais)
                 score = Deck.MIN_SCORE;
@@ -52,6 +55,18 @@ namespace VisasIzspelesBitwise
             while (validMoves != 0)
             {
                 playedCard = Deck.RemoveLastCard(ref validMoves);
+
+                int unknownCards = Deck.FULL_DECK ^ Deck.AllHistoryCards(moveHistory, moveCount) ^ playerHands[this.ID];
+                if (this.Role == PlayerRole.Lielais)
+                    unknownCards ^= burriedCards;
+
+                //int hnd = Convert.ToInt32("00000010100001000001000110010001", 2);
+                Deck.PrintBinaryInt(unknownCards);
+                Console.WriteLine(moveCount);
+                Combine(unknownCards, 0, 0, 2);
+                Console.ReadKey();
+
+                //foreach card combo:
                 newScore = this.SimulateGame(hist, moveCount, playedCard, trickCard, hand0, hand1, hand2, burriedCards, cards0, cards1, cards2, ref gameCount);
                 if (((this.Role == PlayerRole.Lielais) && (score < newScore)) || ((this.Role == PlayerRole.Mazais) && (score > newScore)))
                 {
@@ -64,6 +79,21 @@ namespace VisasIzspelesBitwise
                 }
             }
             return bestCard;
+        }
+
+        private void Combine(int hand, int a, int n, int size)
+        {
+            if (n == size)
+            {
+                // Do stuff
+                Deck.PrintBinaryInt(a);
+                return;
+            }
+            while (hand != 0)
+            {
+                int b = Deck.RemoveLastCard(ref hand);
+                Combine(hand, a | b, n + 1, size);
+            }
         }
 
         /// <summary>

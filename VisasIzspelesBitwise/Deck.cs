@@ -48,7 +48,7 @@ namespace VisasIzspelesBitwise
         {
             switch (card)
             {
-                case EMPTY_CARD: return 16777215;//any card
+                case EMPTY_CARD: return FULL_DECK;//any card
                 case 1: return 15;//hearts
                 case 2: return 15;
                 case 4: return 15;
@@ -86,7 +86,7 @@ namespace VisasIzspelesBitwise
         {
             switch (card)
             {
-                case EMPTY_CARD: return 16777215;//any card
+                case EMPTY_CARD: return FULL_DECK;//any card
                 case 1: return 67104782;//hearts
                 case 2: return 67104780;
                 case 4: return 67104776;
@@ -202,6 +202,14 @@ namespace VisasIzspelesBitwise
             if (validMoves == 0)
                 validMoves = hand;
             return validMoves;
+        }
+
+        public static int AllHistoryCards(int[] moveHistory, int moveCount)
+        {
+            int cards = 0;
+            for (int i = 0; i < moveCount; i++)
+                cards |= moveHistory[i];
+            return cards;
         }
 
         /// <summary>

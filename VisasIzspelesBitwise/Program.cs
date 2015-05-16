@@ -29,6 +29,9 @@ namespace VisasIzspelesBitwise
             table.StartGame();
 
 
+            Console.WriteLine(Deck.FULL_DECK);
+            Deck.PrintBinaryInt(16777215);
+            Deck.PrintBinaryInt(Deck.FULL_DECK);
             stopwatch.Stop();
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
             Console.ReadLine();
