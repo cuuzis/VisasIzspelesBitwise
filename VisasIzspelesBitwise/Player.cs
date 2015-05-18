@@ -31,6 +31,7 @@ namespace VisasIzspelesBitwise
                 return Deck.GetRandomCard(validMoves);
             if (moveCount == START_FROM)
                 Deck.PrintHistory(moveHistory, moveCount);
+            //TODO: play only card
 
             int[] hist = (int[])moveHistory.Clone();
             int[] hands = new int[playerHands.Length];// = (int[])playerHands.Clone();
@@ -65,7 +66,7 @@ namespace VisasIzspelesBitwise
                 {
                     hands[3] = possibleBurried;
                     int nextHandSize = Deck.NEXTHANDSIZE[moveCount];
-                    foreach (int possibleHand in Deck.Combinations(unknownCards ^ possibleBurried, nextHandSize))
+                    foreach (int possibleHand in Deck.Combinations(unknownCards ^ possibleBurried, nextHandSize)) //TODO: learn if player has trumps
                     {
                         hands[this.ID] = playerHands[this.ID];
                         hands[this.Next.ID] = possibleHand;
@@ -83,9 +84,6 @@ namespace VisasIzspelesBitwise
                     score = newScore;
                     bestCard = playedCard;
                 }
-                // output
-                //if (moveCount == START_FROM)
-                    //Console.WriteLine("Unique games " + Deck.SHORTNAME(playedCard) + ": " + gameCount + "\tscore: " + newScore); gameCount = 0;
             }
             return bestCard;
         }
@@ -162,7 +160,7 @@ namespace VisasIzspelesBitwise
                 gameCount++;
             }
             if (score == Deck.MAX_SCORE || score == Deck.MIN_SCORE)
-                score = score;
+                throw new Exception("Bad score");
             return score;
         }
     }
