@@ -20,7 +20,8 @@ namespace VisasIzspelesBitwise
 
         public static readonly int[] VALID_MOVES = new int[MAX_CARD + 1];
         public static readonly int[] STRONGER = new int[MAX_CARD + 1];
-        public static readonly int[] VALUE = new int[FULL_DECK +1];
+        public static readonly int[] VALUE = new int[FULL_DECK + 1];
+        public static readonly int[] NEXTHANDSIZE = new int[SIZE];
 
         private static Random rand = new Random();
 
@@ -35,6 +36,11 @@ namespace VisasIzspelesBitwise
 
             for (int hand = 0; hand <= FULL_DECK; hand++)
                 VALUE[hand] = _VALUE(hand);
+
+            for (int move = 0; move < SIZE; move++)
+                //Console.WriteLine(move + " " + _NEXTHANDSIZE(move));
+                NEXTHANDSIZE[move] = _NEXTHANDSIZE(move);
+
 
 
             if (VALUE[FULL_DECK] != 120)
@@ -117,7 +123,7 @@ namespace VisasIzspelesBitwise
             }
         }
         /// <summary>
-        /// Returns point value for any card combination.
+        /// Returns card points value for any card combination.
         /// </summary>
         private static int _VALUE(int hand)
         {
@@ -143,6 +149,13 @@ namespace VisasIzspelesBitwise
             if ((hand & 16777216) > 0) result += 3;
             if ((hand & 33554432) > 0) result += 3;
             return result;
+        }
+        /// <summary>
+        /// Returns number of cards left in next player's hand.
+        /// </summary>
+        private static int _NEXTHANDSIZE(int moveCount)
+        {
+            return Table.HAND_SIZE - ((moveCount+1) / 3); //3 == player count
         }
         public static string SHORTNAME(int card)
         {
@@ -285,6 +298,26 @@ namespace VisasIzspelesBitwise
             else if (points < 120) return 4;
             else if (points == 120) return 6;//Stiķis ar 0 punktiem?
             return 0;
+        }
+
+        /// <summary>
+        /// Returns all possible subsets of size "size" from given cards.
+        /// </summary>
+        /// <param name="cards">Set of cards</param>
+        /// <param name="size">Size of subsets</param>
+        /// <returns>All possible subsets of size "size" from given cards</returns>
+        public static IEnumerable<int> Combinations(int cards, int size, int a = 0, int elems = 0)
+        {
+            if (elems == size)
+            {
+                yield return a;
+            }
+            while (cards != 0)
+            {
+                int b = Deck.RemoveLastCard(ref cards);
+                foreach (int c in Combinations(cards, size, a | b, elems + 1))
+                    yield return c;
+            }
         }
 
         //debug

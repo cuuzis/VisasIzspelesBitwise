@@ -15,7 +15,7 @@ namespace VisasIzspelesBitwise
         public Player Next;
         public Table Table;
 
-        private const int START_FROM = 15;
+        private const int START_FROM = 12;
         //private static bool dbg = true;
 
         public Player(Table table, int id, string name)
@@ -29,14 +29,13 @@ namespace VisasIzspelesBitwise
         {
             if (moveCount < START_FROM)
                 return Deck.GetRandomCard(validMoves);
+            if (moveCount == START_FROM)
+                Deck.PrintHistory(moveHistory, moveCount);
 
             int[] hist = (int[])moveHistory.Clone();
+            int[] hands = new int[playerHands.Length];// = (int[])playerHands.Clone();
 
-            // for playing with open hands:
-            int hand0 = playerHands[0];
-            int hand1 = playerHands[1];
-            int hand2 = playerHands[2];
-            int burriedCards = playerHands[3];
+            Console.WriteLine(moveCount);
 
             // player cards won:
             int cards0 = playerTricks[0];
@@ -48,7 +47,6 @@ namespace VisasIzspelesBitwise
                 score = Deck.MIN_SCORE;
             else
                 score = Deck.MAX_SCORE;
-            double newScore;
             long gameCount = 0;
             int playedCard;
             int bestCard = Deck.GetLastCard(validMoves);
@@ -56,53 +54,43 @@ namespace VisasIzspelesBitwise
             {
                 playedCard = Deck.RemoveLastCard(ref validMoves);
 
+                double newScore = 0;
+                int simulations = 0;
                 int unknownCards = Deck.FULL_DECK ^ Deck.AllHistoryCards(moveHistory, moveCount) ^ playerHands[this.ID];
+                int unknownBurried = unknownCards;
                 if (this.Role == PlayerRole.Lielais)
-                    unknownCards ^= burriedCards;
+                    unknownBurried = playerHands[3]; // burried cards are known
 
+                foreach (int possibleBurried in Deck.Combinations(unknownBurried, Table.TABLE_SIZE)) // Tests all possible burried cards. TODO: ignore high burried cards
+                {
+                    hands[3] = possibleBurried;
+                    int nextHandSize = Deck.NEXTHANDSIZE[moveCount];
+                    foreach (int possibleHand in Deck.Combinations(unknownCards ^ possibleBurried, nextHandSize))
+                    {
+                        hands[this.ID] = playerHands[this.ID];
+                        hands[this.Next.ID] = possibleHand;
+                        hands[this.Next.Next.ID] = unknownCards ^ possibleBurried ^ possibleHand;
 
-                Console.WriteLine(moveCount);
-                Deck.PrintBinaryInt(playerHands[this.ID]);
-                Deck.PrintBinaryInt(playerHands[(this.ID+1)%3]);
-                Deck.PrintBinaryInt(playerHands[(this.ID+2)%3]);
-                Console.WriteLine(moveCount);
-
-                //int hnd = Convert.ToInt32("00000010100001000001000110010001", 2);
-                Deck.PrintBinaryInt(unknownCards);
-                foreach (int i in Combine(unknownCards, 0, 0, 6))
-                    Deck.PrintBinaryInt(i);
-                Console.ReadKey();
-
-                //foreach card combo:
-                newScore = this.SimulateGame(hist, moveCount, playedCard, trickCard, hand0, hand1, hand2, burriedCards, cards0, cards1, cards2, ref gameCount);
+                        //simulates all possible games
+                        newScore += this.SimulateGame(hist, moveCount, playedCard, trickCard, hands[0], hands[1], hands[2], hands[3], cards0, cards1, cards2, ref gameCount);
+                        simulations++;
+                    }
+                }
+                newScore = newScore / simulations;
+                Console.WriteLine(Deck.SHORTNAME(playedCard) + " score:\t" + newScore + "\tSimulations:\t" + simulations); //Console.ReadKey();
                 if (((this.Role == PlayerRole.Lielais) && (score < newScore)) || ((this.Role == PlayerRole.Mazais) && (score > newScore)))
                 {
                     score = newScore;
                     bestCard = playedCard;
                 }
                 // output
-                if (moveCount == START_FROM) {
-                    Console.WriteLine("Unique games " + Deck.SHORTNAME(playedCard) + ": " + gameCount + "\tscore: " + newScore); gameCount = 0;
-                }
+                //if (moveCount == START_FROM)
+                    //Console.WriteLine("Unique games " + Deck.SHORTNAME(playedCard) + ": " + gameCount + "\tscore: " + newScore); gameCount = 0;
             }
             return bestCard;
         }
 
-        private IEnumerable<int> Combine(int hand, int a, int n, int size)
-        {
-            if (n == size)
-            {
-                // Do stuff
-                //Deck.PrintBinaryInt(a);
-                yield return a;
-            }
-            while (hand != 0)
-            {
-                int b = Deck.RemoveLastCard(ref hand);
-                foreach (int i in Combine(hand, a | b, n + 1, size))
-                    yield return i;
-            }
-        }
+        
 
         /// <summary>
         /// Returns worst case subtree score.
@@ -169,22 +157,12 @@ namespace VisasIzspelesBitwise
             // End of game
             if (moveCount == this.Table.playerCount * Table.HAND_SIZE)
             {
-                //score = Deck.GetScore(Deck.VALUE[cards0 | burriedCards]);  // round score
-                score = Deck.VALUE[cards0 | burriedCards];                  // round points
+                score = Deck.GetScore(Deck.VALUE[cards0 | burriedCards]);  // round score
+                //score = Deck.VALUE[cards0 | burriedCards];                  // round points
                 gameCount++;
-                /*if (score == -6 && dbg)
-                {
-                    Deck.PrintHistory(moveHistory, 24); Console.WriteLine(Deck.VALUE[cards0 | burriedCards] + ": " + score);
-                    Console.WriteLine(Deck.VALUE[cards0 | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[cards0 | burriedCards]));
-                    Deck.PrintHand(cards0);
-                    Console.WriteLine(Deck.VALUE[cards1 | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[cards1 | burriedCards]));
-                    Deck.PrintHand(cards1);
-                    Console.WriteLine(Deck.VALUE[cards2 | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[cards2 | burriedCards]));
-                    Deck.PrintHand(cards2);
-                    Console.WriteLine();
-                    dbg = false;
-                }*/
             }
+            if (score == Deck.MAX_SCORE || score == Deck.MIN_SCORE)
+                score = score;
             return score;
         }
     }

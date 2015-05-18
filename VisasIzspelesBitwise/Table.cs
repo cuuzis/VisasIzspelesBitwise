@@ -93,7 +93,7 @@ namespace VisasIzspelesBitwise
 
         private void PlayGame(int[] playerHands, Player activePlayer)
         {
-            Player firstMover = activePlayer;
+            //Player firstMover = activePlayer;
             int[] moveHistory = new int[Deck.SIZE];
             int trickCard = Deck.EMPTY_CARD;
             int validMoves;
@@ -118,9 +118,11 @@ namespace VisasIzspelesBitwise
             }
             // Output
             int burriedCards = playerHands[3];
-            activePlayer = firstMover;
+            //activePlayer = firstMover;
             Console.WriteLine("Results:");
             Deck.PrintHistory(moveHistory, 24);
+            while (activePlayer.Role != Player.PlayerRole.Lielais)
+                activePlayer = activePlayer.Next;
             Deck.PrintHand(playerTricks[activePlayer.ID]);
             Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
             activePlayer = activePlayer.Next;
