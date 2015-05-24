@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace VisasIzspelesBitwise
 {
-    class Program
+    class Zole
     {
         // Hardcoded params
         //public const bool WRITE_TO_CONSOLE = true;

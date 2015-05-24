@@ -25,12 +25,28 @@ namespace VisasIzspelesBitwise
             Name = name;
         }
 
+        /// <summary>
+        /// Returns 2 cards to burry for a hand. Hand size should be 10.
+        /// </summary>
+        private int BurriedCards(int hand)
+        {
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
+        /// Returns choice of 
+        /// </summary>
+        private PlayerRole PickRole(int hand) //int position (is ID now)
+        {
+            throw new NotImplementedException();
+        }
+
         public int PlayCard(int[] moveHistory, int moveCount, int[] playerTricks, int validMoves, int trickCard, int[] playerHands)
         {
-            if (moveCount < START_FROM)
+           /* if (moveCount < START_FROM)
                 return Deck.GetRandomCard(validMoves);
             if (moveCount == START_FROM)
-                Deck.PrintHistory(moveHistory, moveCount);
+                Deck.PrintHistory(moveHistory, moveCount);*/
             //TODO: play only card
 
             int[] hist = (int[])moveHistory.Clone();
@@ -86,9 +102,7 @@ namespace VisasIzspelesBitwise
                 }
             }
             return bestCard;
-        }
-
-        
+        }       
 
         /// <summary>
         /// Returns worst case subtree score.

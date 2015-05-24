@@ -65,7 +65,7 @@ namespace VisasIzspelesBitwise
             // My random sort for debug
             deck = deck.OrderBy(c => GetNumTMP()).ToList();
             // Random sort
-            Random rand = new Random();
+            Random rand = new Random(); // TODO: Move to Deck, implement Knuth shuffle
             deck = deck.OrderBy(c => (int)rand.Next()).ToList();
             for (int i = 0; i < Deck.SIZE; i++)
                     playerHands[i / HAND_SIZE] |=  deck.ElementAt(i);
