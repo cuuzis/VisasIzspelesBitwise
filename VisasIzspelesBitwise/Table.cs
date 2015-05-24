@@ -46,6 +46,7 @@ namespace VisasIzspelesBitwise
 
         public void StartGame()
         {
+            // Zole.cs assigns players to tables
             player1 = new Player(this, 0, "P1");
             player2 = new Player(this, 1, "P2");
             player3 = new Player(this, 2, "P3");

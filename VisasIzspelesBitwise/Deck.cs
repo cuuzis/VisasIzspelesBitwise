@@ -38,7 +38,6 @@ namespace VisasIzspelesBitwise
                 VALUE[hand] = _VALUE(hand);
 
             for (int move = 0; move < SIZE; move++)
-                //Console.WriteLine(move + " " + _NEXTHANDSIZE(move));
                 NEXTHANDSIZE[move] = _NEXTHANDSIZE(move);
 
 
@@ -296,7 +295,7 @@ namespace VisasIzspelesBitwise
             else if (points <= 60) return -4;
             else if (points < 90) return 2;
             else if (points < 120) return 4;
-            else if (points == 120) return 6;//Stiķis ar 0 punktiem?
+            else if (points == 120) return 6; //single trick with 0 points?
             return 0;
         }
 
