@@ -18,11 +18,14 @@ namespace VisasIzspelesBitwise
 
         static void Main(string[] args)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            
 
 
             Deck myDeck = new Deck();//static is 10x slower, why?
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             Table table = new Table();
             table.StartGame();
 

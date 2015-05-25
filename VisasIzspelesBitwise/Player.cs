@@ -43,16 +43,17 @@ namespace VisasIzspelesBitwise
 
         public int PlayCard(int[] moveHistory, int moveCount, int[] playerTricks, int validMoves, int trickCard, int[] playerHands)
         {
-           /* if (moveCount < START_FROM)
+            if (moveCount < START_FROM)
                 return Deck.GetRandomCard(validMoves);
             if (moveCount == START_FROM)
-                Deck.PrintHistory(moveHistory, moveCount);*/
-            //TODO: play only card
+                Deck.PrintHistory(moveHistory, moveCount);
+
+            //TODO: play only card in last round
 
             int[] hist = (int[])moveHistory.Clone();
             int[] hands = new int[playerHands.Length];// = (int[])playerHands.Clone();
 
-            Console.WriteLine(moveCount);
+            //Console.WriteLine(moveCount);
 
             // player cards won:
             int cards0 = playerTricks[0];
@@ -94,7 +95,8 @@ namespace VisasIzspelesBitwise
                     }
                 }
                 newScore = newScore / simulations;
-                Console.WriteLine(Deck.SHORTNAME(playedCard) + " score:\t" + newScore + "\tSimulations:\t" + simulations); //Console.ReadKey();
+                if (moveCount == START_FROM)
+                    Console.WriteLine(Deck.SHORTNAME(playedCard) + " score:\t" + newScore + "\tSimulations:\t" + simulations); //Console.ReadKey();
                 if (((this.Role == PlayerRole.Lielais) && (score < newScore)) || ((this.Role == PlayerRole.Mazais) && (score > newScore)))
                 {
                     score = newScore;
@@ -170,7 +172,7 @@ namespace VisasIzspelesBitwise
             if (moveCount == this.Table.playerCount * Table.HAND_SIZE)
             {
                 score = Deck.GetScore(Deck.VALUE[cards0 | burriedCards]);  // round score
-                //score = Deck.VALUE[cards0 | burriedCards];                  // round points
+                //score = Deck.VALUE[cards0 | burriedCards];                  // round eyes
                 gameCount++;
             }
             if (score == Deck.MAX_SCORE || score == Deck.MIN_SCORE)

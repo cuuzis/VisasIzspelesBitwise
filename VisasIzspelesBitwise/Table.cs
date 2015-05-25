@@ -120,18 +120,19 @@ namespace VisasIzspelesBitwise
             // Output
             int burriedCards = playerHands[3];
             //activePlayer = firstMover;
-            Console.WriteLine("Results:");
+            Console.WriteLine("Played game:");
             Deck.PrintHistory(moveHistory, 24);
             while (activePlayer.Role != Player.PlayerRole.Lielais)
                 activePlayer = activePlayer.Next;
-            Deck.PrintHand(playerTricks[activePlayer.ID]);
-            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
+            int bigscore = Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]);
+            Console.WriteLine("P"+(activePlayer.ID+1)+" score:"); Deck.PrintHand(playerTricks[activePlayer.ID]);
+            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + bigscore);
             activePlayer = activePlayer.Next;
-            Deck.PrintHand(playerTricks[activePlayer.ID]);
-            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
+            Console.WriteLine("P" + (activePlayer.ID + 1) + " score:"); Deck.PrintHand(playerTricks[activePlayer.ID]);
+            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + (0-bigscore/2));
             activePlayer = activePlayer.Next;
-            Deck.PrintHand(playerTricks[activePlayer.ID]);
-            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + Deck.GetScore(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards]));
+            Console.WriteLine("P" + (activePlayer.ID + 1) + " score:"); Deck.PrintHand(playerTricks[activePlayer.ID]);
+            Console.WriteLine(Deck.VALUE[playerTricks[activePlayer.ID] | burriedCards] + ": " + (0 - bigscore / 2));
             Console.WriteLine();
         }
     }
