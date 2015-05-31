@@ -92,8 +92,12 @@ namespace VisasIzspelesBitwise
                         hands[this.Next.ID] = possibleHand;
                         hands[this.Next.Next.ID] = unknownCards ^ possibleBurried ^ possibleHand;
 
+                        double alpha, beta;
+                        alpha = Deck.MIN_SCORE; 
+                        beta = Deck.MAX_SCORE;
+
                         //simulates all possible games
-                        newScore += this.SimulateGame(hist, moveCount, playedCard, trickCard, hands[0], hands[1], hands[2], hands[3], cards0, cards1, cards2, ref gameCount);
+                        newScore += this.SimulateGame(hist, moveCount, playedCard, trickCard, hands[0], hands[1], hands[2], hands[3], cards0, cards1, cards2, alpha, beta, ref gameCount);
                         simulations++;
                     }
                 }
@@ -113,7 +117,7 @@ namespace VisasIzspelesBitwise
         /// Returns worst case subtree score.
         /// </summary>
         private double SimulateGame(int[] moveHistory, int moveCount, int playedCard, int trickCard,
-            int hand0, int hand1, int hand2, int burriedCards, int cards0, int cards1, int cards2, ref long gameCount)
+            int hand0, int hand1, int hand2, int burriedCards, int cards0, int cards1, int cards2, double alpha, double beta, ref long gameCount)
         {
             int validMoves;
             if (moveCount % this.Table.playerCount == 0)
@@ -161,14 +165,25 @@ namespace VisasIzspelesBitwise
                 score = Deck.MIN_SCORE;
             else
                 score = Deck.MAX_SCORE;
+            double newScore = score;
             while (validMoves != 0)
             {
                 playedCard = Deck.RemoveLowestCard(ref validMoves);
-                double newScore = nextPlayer.SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, burriedCards, cards0, cards1, cards2, ref gameCount);
+                newScore = nextPlayer.SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, burriedCards, cards0, cards1, cards2, alpha, beta, ref gameCount);
                 if (nextPlayer.Role == PlayerRole.Lielais)
+                {
                     score = Math.Max(score, newScore);
+                    alpha = Math.Max(alpha, score);
+                    if (beta <= alpha)
+                        break;
+                }
                 else
+                {
                     score = Math.Min(score, newScore);
+                    beta = Math.Min(beta, score);
+                    if (beta <= alpha)
+                        break;
+                }
             }
 
             // End of game
