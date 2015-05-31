@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+//using System.Security.Cryptography;
 
 // Utility class
 namespace VisasIzspelesBitwise
@@ -15,6 +16,9 @@ namespace VisasIzspelesBitwise
         public const int MAX_CARD = 33554432;
         public const int FULL_DECK = MAX_CARD * 2 - 1;
 
+        public const int HAND_SIZE = 8;
+        public const int TABLE_SIZE = 2;
+
         public const double MAX_SCORE = 10000;
         public const double MIN_SCORE = -10000;
 
@@ -23,7 +27,9 @@ namespace VisasIzspelesBitwise
         public static readonly int[] VALUE = new int[FULL_DECK + 1];
         public static readonly int[] NEXTHANDSIZE = new int[SIZE];
 
-        private static Random rand = new Random();
+        private static Random rand = new Random(12);
+        private static Random rand2 = new Random(23);
+        //private static int md5seed = 0;
 
         //static Deck()
         public Deck()
@@ -44,6 +50,53 @@ namespace VisasIzspelesBitwise
 
             if (VALUE[FULL_DECK] != 120)
                 throw new Exception("Deck value is not 120!");
+        }
+
+            /*MD5 md5Hash = MD5.Create();
+            using (md5Hash)
+            {
+                md5seed++;
+
+                // Convert the input string to a byte array and compute the hash. 
+                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes("wasd"+md5seed));
+
+                // Create a new Stringbuilder to collect the bytes 
+                // and create a string.
+                StringBuilder sBuilder = new StringBuilder();
+
+                // Loop through each byte of the hashed data  
+                // and format each one as a hexadecimal string. 
+                for (int i = 0; i < data.Length; i++)
+                {
+                    sBuilder.Append(data[i].ToString("x2"));
+                }
+
+                // Return the hexadecimal string. 
+                string hash = sBuilder.ToString();
+
+                int result = 0;
+                foreach (char ch in hash)
+                {
+                    result += (int)ch;
+                }
+                return result;
+            }*/
+
+        public static int[] GetRandomHands()
+        {
+            int[] playerHands = { 0, 0, 0, 0 };
+            List<int> deck = new List<int>();
+            for (int i = 0; i < Deck.SIZE; i++)
+                deck.Add(1 << i);
+            // Random sort
+            //Random rand = new Random(); // TODO: Move to Deck, implement Knuth shuffle
+            deck = deck.OrderBy(c => (int)rand.Next()).ToList();
+            //deck = deck.OrderBy(c => Deck.Next()).ToList();
+            for (int i = 0; i < Deck.SIZE; i++)
+                playerHands[i / HAND_SIZE] |= deck.ElementAt(i);
+            if ((playerHands[0] ^ playerHands[1] ^ playerHands[2] ^ playerHands[3]) != Deck.FULL_DECK)
+                throw new Exception("Incorrect hands");
+            return playerHands;
         }
 
         /// <summary>
@@ -154,7 +207,7 @@ namespace VisasIzspelesBitwise
         /// </summary>
         private static int _NEXTHANDSIZE(int moveCount)
         {
-            return Table.HAND_SIZE - ((moveCount+1) / 3); //3 == player count
+            return HAND_SIZE - ((moveCount+1) / 3); //3 == player count
         }
         public static string SHORTNAME(int card)
         {
@@ -192,7 +245,6 @@ namespace VisasIzspelesBitwise
 
 
         // Public utility methods
-
         public static Player GetWinner(int[] moveHistory, int moveCount, Player activePlayer)
         {
             if (IsStronger(moveHistory[moveCount - 2], moveHistory[moveCount - 3]))
@@ -231,13 +283,13 @@ namespace VisasIzspelesBitwise
         {
             return ((card1 & Deck.STRONGER[card2]) != 0);
         }
-        public static int RemoveLastCard(ref int hand)
+        public static int RemoveLowestCard(ref int hand)
         {
             int card = hand & -hand;
             hand = hand ^ card;
             return card;
         }
-        public static int GetLastCard(int hand)
+        public static int GetLowestCard(int hand)
         {
             return hand & -hand;
         }
@@ -263,12 +315,13 @@ namespace VisasIzspelesBitwise
             return count;
         }
 
-        public static int GetRandomCard(int hand)
+        public static int PickRandomCard(int hand)
         {
             int card = 0;
             int count = CountCards(hand);
-            for (int i = 0; i < rand.Next(1, count); i++)
-                card = RemoveLastCard(ref hand);
+            for (int i = 0; i < rand2.Next(1, count); i++)
+            //for (int i = 0; i < (Next() % count)+1; i++)
+                card = RemoveLowestCard(ref hand);
             return card;
         }
 
@@ -284,11 +337,11 @@ namespace VisasIzspelesBitwise
             if (message != "")
                 Console.Write(message + ": ");
             while (hand != 0)
-                Console.Write(Deck.SHORTNAME(RemoveLastCard(ref hand)) + " ");
+                Console.Write(Deck.SHORTNAME(RemoveLowestCard(ref hand)) + " ");
             Console.WriteLine();
         }
 
-        public static int GetScore(int points)  // Lielā rezultāts - 3 spēlētāji, bez pulēm
+        public static int GetScore(int points)  // Lielā rezultāts - 3 spēlētāji, bez pulēm // Needs speedy lookup table SCORE[120]
         {
             if (points == 0) return -8;
             else if (points <= 30) return -6;
@@ -313,7 +366,7 @@ namespace VisasIzspelesBitwise
             }
             while (cards != 0)
             {
-                int b = Deck.RemoveLastCard(ref cards);
+                int b = Deck.RemoveLowestCard(ref cards);
                 foreach (int c in Combinations(cards, size, a | b, elems + 1))
                     yield return c;
             }

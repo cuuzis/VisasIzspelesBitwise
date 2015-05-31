@@ -12,14 +12,15 @@ namespace VisasIzspelesBitwise
     class Zole
     {
         // Hardcoded params
-        //public const bool WRITE_TO_CONSOLE = true;
-        public static String FILENAME = "izspeles.txt";
+        public const String FILENAME = "izspeles.txt";
 
 
         static void Main(string[] args)
         {
-            
-
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+            for (int i = 1; i <= 24; i++)
+                Console.Write("{0}\t", i);
+            Console.WriteLine();
 
             Deck myDeck = new Deck();//static is 10x slower, why?
 
@@ -30,9 +31,13 @@ namespace VisasIzspelesBitwise
             table.StartGame();
 
 
+            //Console.ReadLine();
             stopwatch.Stop();
+
+            //Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed.TotalSeconds);
+            //Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed.TotalMilliseconds);
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
-            Console.ReadLine();
+            //Console.ReadLine();
         }
     }
 }

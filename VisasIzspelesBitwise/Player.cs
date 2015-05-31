@@ -15,8 +15,8 @@ namespace VisasIzspelesBitwise
         public Player Next;
         public Table Table;
 
+        private const int LAST_ROUND = 22;
         private const int START_FROM = 12;
-        //private static bool dbg = true;
 
         public Player(Table table, int id, string name)
         {
@@ -26,32 +26,35 @@ namespace VisasIzspelesBitwise
         }
 
         /// <summary>
-        /// Returns 2 cards to burry for a hand. Hand size should be 10.
+        /// Returns 2 cards to burry for a given hand. Hand size should be 10.
         /// </summary>
-        private int BurriedCards(int hand)
+        public int BurryCards(int hand)
         {
-            throw new NotImplementedException();
+            // takes 2 lowest cards
+            return Deck.RemoveLowestCard(ref hand) | Deck.RemoveLowestCard(ref hand);
         }
         
         /// <summary>
-        /// Returns choice of 
+        /// Returns choice of role
         /// </summary>
-        private PlayerRole PickRole(int hand) //int position (is ID now)
+        private PlayerRole PickRole(int hand) //int position (is ID for now)
         {
             throw new NotImplementedException();
         }
 
-        public int PlayCard(int[] moveHistory, int moveCount, int[] playerTricks, int validMoves, int trickCard, int[] playerHands)
+        public int PlayCard(int[] moveHistory, int moveCount, int[] playerTricks, int validMoves, int trickCard, int[] playerHands) // TODO: no player hands
         {
-            if (moveCount < START_FROM)
-                return Deck.GetRandomCard(validMoves);
-            if (moveCount == START_FROM)
-                Deck.PrintHistory(moveHistory, moveCount);
+            //TODO: play only card in last round - also Table.cs
+            if (moveCount >= LAST_ROUND - 1)
+                return Deck.RemoveLowestCard(ref validMoves);
 
-            //TODO: play only card in last round
+            if (moveCount < START_FROM - 1)
+                return Deck.PickRandomCard(validMoves);
+            //if (moveCount == START_FROM)
+            //    Deck.PrintHistory(moveHistory, moveCount);
 
             int[] hist = (int[])moveHistory.Clone();
-            int[] hands = new int[playerHands.Length];// = (int[])playerHands.Clone();
+            int[] hands = new int[playerHands.Length];
 
             //Console.WriteLine(moveCount);
 
@@ -67,10 +70,10 @@ namespace VisasIzspelesBitwise
                 score = Deck.MAX_SCORE;
             long gameCount = 0;
             int playedCard;
-            int bestCard = Deck.GetLastCard(validMoves);
+            int bestCard = Deck.GetLowestCard(validMoves);
             while (validMoves != 0)
             {
-                playedCard = Deck.RemoveLastCard(ref validMoves);
+                playedCard = Deck.RemoveLowestCard(ref validMoves);
 
                 double newScore = 0;
                 int simulations = 0;
@@ -79,7 +82,7 @@ namespace VisasIzspelesBitwise
                 if (this.Role == PlayerRole.Lielais)
                     unknownBurried = playerHands[3]; // burried cards are known
 
-                foreach (int possibleBurried in Deck.Combinations(unknownBurried, Table.TABLE_SIZE)) // Tests all possible burried cards. TODO: ignore high burried cards
+                foreach (int possibleBurried in Deck.Combinations(unknownBurried, Deck.TABLE_SIZE)) // Tests all possible burried cards. TODO: ignore high burried cards
                 {
                     hands[3] = possibleBurried;
                     int nextHandSize = Deck.NEXTHANDSIZE[moveCount];
@@ -95,8 +98,8 @@ namespace VisasIzspelesBitwise
                     }
                 }
                 newScore = newScore / simulations;
-                if (moveCount == START_FROM)
-                    Console.WriteLine(Deck.SHORTNAME(playedCard) + " score:\t" + newScore + "\tSimulations:\t" + simulations); //Console.ReadKey();
+                //if (moveCount == START_FROM)
+                //    Console.WriteLine(Deck.SHORTNAME(playedCard) + " score:\t" + newScore + "\tSimulations:\t" + simulations); //Console.ReadKey();
                 if (((this.Role == PlayerRole.Lielais) && (score < newScore)) || ((this.Role == PlayerRole.Mazais) && (score > newScore)))
                 {
                     score = newScore;
@@ -160,7 +163,7 @@ namespace VisasIzspelesBitwise
                 score = Deck.MAX_SCORE;
             while (validMoves != 0)
             {
-                playedCard = Deck.RemoveLastCard(ref validMoves);
+                playedCard = Deck.RemoveLowestCard(ref validMoves);
                 double newScore = nextPlayer.SimulateGame(moveHistory, moveCount, playedCard, trickCard, hand0, hand1, hand2, burriedCards, cards0, cards1, cards2, ref gameCount);
                 if (nextPlayer.Role == PlayerRole.Lielais)
                     score = Math.Max(score, newScore);
@@ -169,7 +172,7 @@ namespace VisasIzspelesBitwise
             }
 
             // End of game
-            if (moveCount == this.Table.playerCount * Table.HAND_SIZE)
+            if (moveCount == this.Table.playerCount * Deck.HAND_SIZE)
             {
                 score = Deck.GetScore(Deck.VALUE[cards0 | burriedCards]);  // round score
                 //score = Deck.VALUE[cards0 | burriedCards];                  // round eyes
