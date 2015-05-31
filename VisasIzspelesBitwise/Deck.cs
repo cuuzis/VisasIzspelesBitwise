@@ -29,7 +29,6 @@ namespace VisasIzspelesBitwise
 
         private static Random rand = new Random(12);
         private static Random rand2 = new Random(23);
-        //private static int md5seed = 0;
 
         //static Deck()
         public Deck()
@@ -52,36 +51,6 @@ namespace VisasIzspelesBitwise
                 throw new Exception("Deck value is not 120!");
         }
 
-            /*MD5 md5Hash = MD5.Create();
-            using (md5Hash)
-            {
-                md5seed++;
-
-                // Convert the input string to a byte array and compute the hash. 
-                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes("wasd"+md5seed));
-
-                // Create a new Stringbuilder to collect the bytes 
-                // and create a string.
-                StringBuilder sBuilder = new StringBuilder();
-
-                // Loop through each byte of the hashed data  
-                // and format each one as a hexadecimal string. 
-                for (int i = 0; i < data.Length; i++)
-                {
-                    sBuilder.Append(data[i].ToString("x2"));
-                }
-
-                // Return the hexadecimal string. 
-                string hash = sBuilder.ToString();
-
-                int result = 0;
-                foreach (char ch in hash)
-                {
-                    result += (int)ch;
-                }
-                return result;
-            }*/
-
         public static int[] GetRandomHands()
         {
             int[] playerHands = { 0, 0, 0, 0 };
@@ -91,7 +60,6 @@ namespace VisasIzspelesBitwise
             // Random sort
             //Random rand = new Random(); // TODO: Move to Deck, implement Knuth shuffle
             deck = deck.OrderBy(c => (int)rand.Next()).ToList();
-            //deck = deck.OrderBy(c => Deck.Next()).ToList();
             for (int i = 0; i < Deck.SIZE; i++)
                 playerHands[i / HAND_SIZE] |= deck.ElementAt(i);
             if ((playerHands[0] ^ playerHands[1] ^ playerHands[2] ^ playerHands[3]) != Deck.FULL_DECK)

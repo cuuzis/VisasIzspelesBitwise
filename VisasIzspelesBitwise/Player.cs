@@ -16,7 +16,7 @@ namespace VisasIzspelesBitwise
         public Table Table;
 
         private const int LAST_ROUND = 22;
-        private const int START_FROM = 12;
+        private const int START_FROM = 11;
 
         public Player(Table table, int id, string name)
         {

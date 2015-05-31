@@ -30,7 +30,7 @@ namespace VisasIzspelesBitwise
             player2.Next = player3;
             player3.Next = player1;
 
-            for (int test = 0; test < 3; test++) // 100 test runs
+            for (int test = 0; test < 100; test++) // 100 test runs
             {
                 int[] playerHands = Deck.GetRandomHands();                   
 
